@@ -345,8 +345,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     prefs.edit().putInt("startOffset", startOffset).commit();
   }
   
-  private void start() throws JSONException {
-
+  private void start() {
     if (Build.VERSION.SDK_INT >= 26) {
       API26Wrapper.startForegroundService(getActivity(),
         new Intent(getActivity(), SensorListener.class));
