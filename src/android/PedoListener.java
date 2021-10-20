@@ -14,6 +14,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -42,6 +44,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   public static int RUNNING = 2;
   public static int ERROR_FAILED_TO_START = 3;
   public static int ERROR_NO_SENSOR_FOUND = 4;
+  public static int ERROR_NO_PERMISSION = 3;
   public static int PAUSED = 5;
 
   public static int DEFAULT_GOAL = 1000;
@@ -305,7 +308,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
         }
       }
       // all dynamic permissions accepted!
-      Log.i(TAG, "Dynamic permissions accepted");
+      Log.i("TAG", "Dynamic permissions accepted");
       start();
     }
   }
