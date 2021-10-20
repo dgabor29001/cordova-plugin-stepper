@@ -35,6 +35,8 @@ import android.util.Pair;
  */
 public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
+  public static int REQUEST_DYN_PERMS = 101;
+
   public static int STOPPED = 0;
   public static int STARTING = 1;
   public static int RUNNING = 2;
@@ -92,7 +94,8 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     this.callbackContext = callbackContext;
 
     if (action.equals("startStepperUpdates")) {
-      start(args);
+      setPrefs(args);
+      getAuth();
     }
     else if (action.equals("stopStepperUpdates")) {
       stop();
@@ -278,7 +281,36 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     Log.i("TAG", "onReset");
   }
 
-  private void start(JSONArray args) throws JSONException {
+  private void getAuth () {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      cordova.requestPermission(this, REQUEST_DYN_PERMS, Manifest.permission.ACTIVITY_RECOGNITION);
+    } else {
+      start();
+    }
+  }
+
+  // called when the dynamic permissions are asked
+  @Override
+  public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
+    if (requestCode == REQUEST_DYN_PERMS) {
+      for (int i = 0; i < grantResults.length; i++) {
+        if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+          String errmsg = "Permission denied ";
+          for (String perm : permissions) {
+            errmsg += " " + perm;
+          }
+          this.status = PedoListener.ERROR_NO_PERMISSION;
+          this.fail(PedoListener.ERROR_NO_PERMISSION, "Permission denied: " + permissions[i]);
+          return;
+        }
+      }
+      // all dynamic permissions accepted!
+      Log.i(TAG, "Dynamic permissions accepted");
+      start();
+    }
+  }
+  
+  private void setPrefs(JSONArray args) throws JSONException {
     startOffset = args.getInt(0);
     final JSONObject options = args.getJSONObject(1);
 
@@ -308,6 +340,9 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     }
 
     prefs.edit().putInt("startOffset", startOffset).commit();
+  }
+  
+  private void start() throws JSONException {
 
     if (Build.VERSION.SDK_INT >= 26) {
       API26Wrapper.startForegroundService(getActivity(),
