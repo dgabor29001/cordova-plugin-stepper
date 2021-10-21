@@ -96,7 +96,18 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
     this.callbackContext = callbackContext;
 
-    if (action.equals("startStepperUpdates")) {
+    if (action.equals("isStepCountingAvailable")) {
+      sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+      sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+      if (sensor != null) {
+    	this.win(true);
+        return true;
+      } else {
+        this.status = PedoListener.ERROR_NO_SENSOR_FOUND;
+        this.win(false);
+        return true;
+      }
+    } else if (action.equals("startStepperUpdates")) {
       setPrefs(args);
       getAuth();
     }
