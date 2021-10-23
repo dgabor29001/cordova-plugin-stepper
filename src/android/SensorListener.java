@@ -182,12 +182,18 @@ public class SensorListener extends Service implements SensorEventListener {
       if (today_offset == Integer.MIN_VALUE) today_offset = -steps;
       notificationBuilder.setProgress(goal, today_offset + steps, false).setContentText(
         today_offset + steps >= goal ?
-          String.format(prefs.getString(PedoListener.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, "Goal reached! %s steps and counting"),
+          String.format(prefs.getString(PedoListener.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, "%s steps today"),
             NumberFormat.getInstance(Locale.getDefault())
-              .format((today_offset + steps))) :
+              .format(today_offset + steps),
+            NumberFormat.getInstance(Locale.getDefault())
+              .format(goal)) :
           String.format(prefs.getString(PedoListener.PEDOMETER_STEPS_TO_GO_FORMAT_TEXT, "%s steps to go"),
             NumberFormat.getInstance(Locale.getDefault())
-              .format((goal - today_offset - steps))));
+              .format(goal - today_offset - steps),
+            NumberFormat.getInstance(Locale.getDefault())
+              .format(today_offset + steps),
+            NumberFormat.getInstance(Locale.getDefault())
+              .format(goal)));
     } else { // still no step value?
       notificationBuilder.setContentText(prefs.getString(PedoListener.PEDOMETER_YOUR_PROGRESS_FORMAT_TEXT, "Your progress will be shown here soon"));
     }

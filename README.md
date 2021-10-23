@@ -36,7 +36,9 @@ Example:
 ```js
 var offset = 0, options = { 
     pedometerIsCountingText: 'Pedometer is counting', 
-    pedometerStepsToGoFormatText: '%s steps to go'
+    pedometerStepsToGoFormatText: '%s steps to go', // available variables: [stepsToGo, todaySteps, goal]. Insert using %1$s, %2$s, %3$s placeholders
+    pedometerYourProgressFormatText: 'Your progress will be shown here soon', 
+    pedometerGoalReachedFormatText: '%s steps today', // available variables: [todaySteps, goal]. Insert using %1$s, %2$s placeholders
   };
   
 stepper.startStepperUpdates(offset, success, error, options);
@@ -70,7 +72,8 @@ function error (err) {
 _Note: Background service can only be stopped by this method._
 
 #### setGoal (num, successCallback, errorCallback) 
-Set a goal (number of steps) for a pedometer. This is necessary for the correct calculation of the remaining steps and the display of the indicator in the notification.
+Set a goal (number of steps) for a pedometer.
+When a goal is set, a progress bar is shown in the notification.
 
 Example:
 ```js
