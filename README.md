@@ -21,7 +21,7 @@ cordova plugin add https://github.com/achubutkin/cordova-plugin-stepper
 ```
 ## Usage
 
-#### startStepperUpdates (offset, successCallback, errorCallback, options) 
+#### startStepperUpdates (offset, options) => Promise 
 Run with options and listener data updates. The success handler is called once during the first call and then called from the background thread whenever data is available.
 
 The method also creates a background service with notification (Android only).
@@ -41,37 +41,37 @@ var offset = 0, options = {
     pedometerGoalReachedFormatText: '%s steps today', // available variables: [todaySteps, goal]. Insert using %1$s, %2$s placeholders
   };
   
-stepper.startStepperUpdates(offset, success, error, options);
-
-function success (result) {
-  var stepsToday = result.steps_today;
-}
-function error (err) {
-  console.error(err);
-}
+stepper
+  .startStepperUpdates(offset, options)
+  .then((result) => {
+    var stepsToday = result.steps_today;
+  })
+  .catch((error) => {
+    console.error(err);
+  });
 ```
 
 _Note: When the application is suspended, the call to handlers is temporarily suspended. When the application is closed, the background service continues to work (in Android platform). The background service continues after the device is restarted._
 
 _To stop the background service, call the method `stopStepperUpdates`. When you open an application and call the launch method again, it joins the current background service._
 
-#### stopStepperUpdates (successCallback, errorCallback) 
+#### stopStepperUpdates () => Promise 
 The method stops the background calls to the success handler of the `startStepperUpdates` method and stops the background service (in Android platform) with remove notification.
 
 Example:
 ```js
-stepper.startStepperUpdates(success, error);
-
-function success () {
-}
-function error (err) {
-  console.error(err);
-}
+stepper.stopStepperUpdates()
+  .then(() => {
+    console.error("Stopped");
+  })
+  .catch((error) => {
+    console.error(err);
+  });
 ```
 
 _Note: Background service can only be stopped by this method._
 
-#### setGoal (num, successCallback, errorCallback) 
+#### setGoal (num) => Promise
 Set a goal (number of steps) for a pedometer.
 When a goal is set, a progress bar is shown in the notification.
 
@@ -79,18 +79,18 @@ Example:
 ```js
 var goal = 1000;
 
-stepper.setGoal(goal, success, error);
-
-function success () {
-}
-function error () {
-  console.error(err);
-}
+stepper.setGoal(goal)
+  .then(() => {
+    console.error("OK");
+  })
+  .catch((error) => {
+    console.error(err);
+  });
 ```
 
 _Note: It is recommended to call the method before calling the method `startStepperUpdates`, but it is allowed to change the target during operation._
 
-#### getSteps (date, successCallback, errorCallback) 
+#### getSteps (date) => Promise
 Gets the number of steps for the specified day. `date` parameter must be start of day and number of milliseconds since the Unix Epoch.
 
 Example:
@@ -98,17 +98,16 @@ Example:
 var interval = 1000 * 60 * 60 * 24, 
   startOfDay = Math.floor(Date.now() / interval) * interval;
 
-stepper.getSteps(startOfDay, success, error);
-
-function success (result) {
-  var steps = result.steps;
-}
-function error () {
-  console.error(err);
-}
+stepper.getSteps(startOfDay)
+  .then((result) => {
+    console.log(result.steps);
+  })
+  .catch((error) => {
+    console.error(err);
+  });
 ```
 
-#### getStepsByPeriod (start, end, successCallback, errorCallback) 
+#### getStepsByPeriod (start, end) => Promise
 Gets the number of steps for the specified period. `start` and `end` parameters must be start of day and number of milliseconds since the Unix Epoch.
 
 Example:
@@ -118,35 +117,33 @@ var interval = 1000 * 60 * 60 * 24,
   start = Math.floor(Date.now() / interval) * interval - (interval * 3),
   end  = Math.floor(Date.now() / interval) * interval;
 
-stepper.getSteps(start, end, success, error);
-
-function success (result) {
-  var steps = result.steps;
-}
-function error () {
-  console.error(err);
-}
+stepper.getSteps(start, end)
+  .then((result) => {
+    console.log(result.steps);
+  })
+  .catch((error) => {
+    console.error(err);
+  });
 ```
 
-#### getLastEntries (num, successCallback, errorCallback) 
+#### getLastEntries (num) => Promise
 Gets all recent records in the specified limit.
 
 Example:
 ```js
 var limit = 10;
 
-stepper.getLastEntries(limit, success, error);
-
-function success (result) {
-  var entries = result.entries;
-  for (var i = 0; i < entries.length; i++) {
-    var entry = entries[i], data = entry.data,
-      steps = entry.steps;
-  }
-}
-function error () {
-  console.error(err);
-}
+stepper.getLastEntries(limit)
+  .then((result) => {
+	  var entries = result.entries;
+	  for (var i = 0; i < entries.length; i++) {
+	    var entry = entries[i], data = entry.data,
+	      steps = entry.steps;
+	  }
+  })
+  .catch((error) => {
+    console.error(err);
+  });
 ```
 
 ## Platform and device support

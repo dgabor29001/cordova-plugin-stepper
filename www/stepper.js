@@ -6,69 +6,138 @@ var Stepper = function () {
 
 // IOS & Android - Documented
 Stepper.prototype.isStepCountingAvailable = function (onSuccess, onError) {
-    exec(onSuccess, onError, "Stepper", "isStepCountingAvailable", []);
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "isStepCountingAvailable", []);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // IOS & Android - Documented
 Stepper.prototype.startStepperUpdates = function (offset, onSuccess, onError, options) {
+	if(typeof(onSuccess) === "object" && typeof(onError) == "undefined" && typeof(options) == "undefined") {
+		options = onSuccess;
+		onSuccess = undefined;
+	}
     offset = parseInt(offset) || 0;
     options = options || {};
-    exec(onSuccess, onError, "Stepper", "startStepperUpdates", [offset, options]);
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "startStepperUpdates", [offset, options]);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // IOS & Android - Documented
 Stepper.prototype.stopStepperUpdates = function (onSuccess, onError) {
-    exec(onSuccess, onError, "Stepper", "stopStepperUpdates", []);
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "stopStepperUpdates", []);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // IOS - UnDocumented
 Stepper.prototype.queryData = function (onSuccess, onError, options) {
-    exec(onSuccess, onError, "Stepper", "queryData", [options]);
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "queryData", [options]);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // Android - UnDocumented
 Stepper.prototype.getCurrentSteps = function (onSuccess, onError) {
-    exec(onSuccess, onError, "Stepper", "getCurrentSteps", []);
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "getCurrentSteps", []);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // Android - Not Available - UnDocumented
 Stepper.prototype.getDays = function (onSuccess, onError) {
-    exec(onSuccess, onError, "Stepper", "getDays", []);
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "getDays", []);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // Android - Not Available - UnDocumented
 Stepper.prototype.getDaysWithoutToday = function (onSuccess, onError) {
-    exec(onSuccess, onError, "Stepper", "getDaysWithoutToday", []);
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "getDaysWithoutToday", []);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // Android - Behave wierd - Documented
 Stepper.prototype.getSteps = function (date, onSuccess, onError) {
-    exec(onSuccess, onError, "Stepper", "getSteps", [date]);
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "getSteps", [date]);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // Android - Behave wierd - Documented
 Stepper.prototype.getStepsByPeriod = function (start, end, onSuccess, onError) {
-    exec(onSuccess, onError, "Stepper", "getStepsByPeriod", [start, end]);
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "getStepsByPeriod", [start, end]);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // Android - Not Available - UnDocumented
 Stepper.prototype.getTotalWithoutToday = function (onSuccess, onError) {
-    exec(onSuccess, onError, "Stepper", "getTotalWithoutToday", []);
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "getTotalWithoutToday", []);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // Android - Behave wierd - Documented
 Stepper.prototype.getLastEntries = function (num, onSuccess, onError) {
-    exec(onSuccess, onError, "Stepper", "getLastEntries", [num]);
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "getLastEntries", [num]);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // Android - Documented
 Stepper.prototype.setNotificationLocalizedStrings = function (keyValueObj, onSuccess, onError) {
-    exec(onSuccess, onError, "Stepper", "setNotificationLocalizedStrings", [keyValueObj]);
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "setNotificationLocalizedStrings", [keyValueObj]);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // Android - Documented
 Stepper.prototype.setGoal = function (num, onSuccess, onError) {
-    exec(onSuccess, onError, "Stepper", "setGoal", [num]);
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "setGoal", [num]);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 module.exports = new Stepper();
