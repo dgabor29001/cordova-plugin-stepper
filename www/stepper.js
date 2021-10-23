@@ -16,18 +16,9 @@ Stepper.prototype.isStepCountingAvailable = function (onSuccess, onError) {
 
 // IOS & Android - Documented
 Stepper.prototype.startStepperUpdates = function (offset, onSuccess, onError, options) {
-	if(typeof(onSuccess) === "object" && typeof(onError) == "undefined" && typeof(options) == "undefined") {
-		options = onSuccess;
-		onSuccess = undefined;
-	}
     offset = parseInt(offset) || 0;
     options = options || {};
-    let promise = new Promise(function(resolve, reject) {
-        exec(resolve, reject, "Stepper", "startStepperUpdates", [offset, options]);
-    });
-    if (onSuccess) promise = promise.then(onSuccess);
-    if (onError) promise = promise.catch(onError);
-    return promise;
+    exec(onSuccess, onError, "Stepper", "startStepperUpdates", [offset, options]);
 };
 
 // IOS & Android - Documented

@@ -21,7 +21,7 @@ cordova plugin add https://github.com/achubutkin/cordova-plugin-stepper
 ```
 ## Usage
 
-#### startStepperUpdates (offset, options) => Promise 
+#### startStepperUpdates (offset, successCallback, errorCallback, options) 
 Run with options and listener data updates. The success handler is called once during the first call and then called from the background thread whenever data is available.
 
 The method also creates a background service with notification (Android only).
@@ -41,14 +41,14 @@ var offset = 0, options = {
     pedometerGoalReachedFormatText: '%s steps today', // available variables: [todaySteps, goal]. Insert using %1$s, %2$s placeholders
   };
   
-stepper
-  .startStepperUpdates(offset, options)
-  .then((result) => {
-    var stepsToday = result.steps_today;
-  })
-  .catch((error) => {
-    console.error(err);
-  });
+stepper.startStepperUpdates(offset, success, error, options);
+
+function success (result) {
+  var stepsToday = result.steps_today;
+}
+function error (err) {
+  console.error(err);
+}
 ```
 
 _Note: When the application is suspended, the call to handlers is temporarily suspended. When the application is closed, the background service continues to work (in Android platform). The background service continues after the device is restarted._
