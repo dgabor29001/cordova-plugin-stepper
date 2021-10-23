@@ -39,7 +39,7 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void) startPedometerUpdates:(CDVInvokedUrlCommand*)command;
+- (void) startStepperUpdates:(CDVInvokedUrlCommand*)command;
 {
     __block CDVPluginResult* pluginResult = nil;
 
@@ -68,7 +68,7 @@
     }];
 }
 
-- (void) stopPedometerUpdates:(CDVInvokedUrlCommand*)command;
+- (void) stopStepperUpdates:(CDVInvokedUrlCommand*)command;
 {
     [self.pedometer stopPedometerUpdates];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
