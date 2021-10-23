@@ -47,7 +47,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   public static int ERROR_NO_PERMISSION = 3;
   public static int PAUSED = 5;
 
-  public static int DEFAULT_GOAL = 1000;
+  public static int DEFAULT_GOAL = 0;
 
   public static String GOAL_PREF_INT = "GoalPrefInt";
 
@@ -181,7 +181,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     }
 
     SharedPreferences prefs = cordova.getContext().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
-    if (goal > 0) {
+    if (goal >= 0) {
       prefs.edit().putInt(PedoListener.GOAL_PREF_INT, goal).apply();
     }
   }
