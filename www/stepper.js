@@ -40,17 +40,7 @@ Stepper.prototype.stopStepperUpdates = function (onSuccess, onError) {
     return promise;
 };
 
-// IOS - UnDocumented
-Stepper.prototype.queryData = function (onSuccess, onError, options) {
-    let promise = new Promise(function(resolve, reject) {
-        exec(resolve, reject, "Stepper", "queryData", [options]);
-    });
-    if (onSuccess) promise = promise.then(onSuccess);
-    if (onError) promise = promise.catch(onError);
-    return promise;
-};
-
-// Android - UnDocumented
+// Android - Not Available - UnDocumented
 Stepper.prototype.getCurrentSteps = function (onSuccess, onError) {
     let promise = new Promise(function(resolve, reject) {
         exec(resolve, reject, "Stepper", "getCurrentSteps", []);
@@ -80,20 +70,17 @@ Stepper.prototype.getDaysWithoutToday = function (onSuccess, onError) {
     return promise;
 };
 
-// Android - Behave wierd - Documented
+// IOS & Android - Documented
 Stepper.prototype.getSteps = function (date, onSuccess, onError) {
-    let promise = new Promise(function(resolve, reject) {
-        exec(resolve, reject, "Stepper", "getSteps", [date]);
-    });
-    if (onSuccess) promise = promise.then(onSuccess);
-    if (onError) promise = promise.catch(onError);
-    return promise;
+	const startDate = 1000*3600*24*Math.floor(new Date(date || new Date()).getTime()/(1000*3600*24));
+	const endDate = 1000*3600*24*Math.ceil(new Date(date || new Date()).getTime()/(1000*3600*24)) - 1;
+    return this.getStepsByPeriod(startDate, endDate, onSuccess, onError);
 };
 
 // Android - Behave wierd - Documented
 Stepper.prototype.getStepsByPeriod = function (start, end, onSuccess, onError) {
     let promise = new Promise(function(resolve, reject) {
-        exec(resolve, reject, "Stepper", "getStepsByPeriod", [start, end]);
+        exec(resolve, reject, "Stepper", "getStepsByPeriod", [new Date(start || 0).toISOString(), new Date(end || 1000*3600*24*Math.ceil(new Date().getTime()/(1000*3600*24))).toISOString()]);
     });
     if (onSuccess) promise = promise.then(onSuccess);
     if (onError) promise = promise.catch(onError);

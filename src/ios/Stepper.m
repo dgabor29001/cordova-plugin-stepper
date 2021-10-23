@@ -75,16 +75,14 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void) queryData:(CDVInvokedUrlCommand*)command;
+- (void) getStepsByPeriod:(CDVInvokedUrlCommand*)command;
 {
-    NSDictionary* args = [command.arguments objectAtIndex:0];
-
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"];
     [dateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 
-    NSDate* startDate = [dateFormatter dateFromString:[args objectForKey:@"startDate"]];
-    NSDate* endDate = [dateFormatter dateFromString:[args objectForKey:@"endDate"]];
+    NSDate* startDate = [dateFormatter dateFromString:[command.arguments objectAtIndex:0]];
+    NSDate* endDate = [dateFormatter dateFromString:[command.arguments objectAtIndex:0]];
 
     __block CDVPluginResult* pluginResult = nil;
 
@@ -97,7 +95,7 @@
             else
             {
                 NSDictionary* pedestrianData = @{
-                    @"numberOfSteps": [CMPedometer isStepCountingAvailable] && pedometerData.numberOfSteps ? pedometerData.numberOfSteps : [NSNumber numberWithInt:0],
+                    @"steps": [CMPedometer isStepCountingAvailable] && pedometerData.numberOfSteps ? pedometerData.numberOfSteps : [NSNumber numberWithInt:0],
                     @"distance": [CMPedometer isDistanceAvailable] && pedometerData.distance ? pedometerData.distance : [NSNumber numberWithInt:0],
                     @"floorsAscended": [CMPedometer isFloorCountingAvailable] && pedometerData.floorsAscended ? pedometerData.floorsAscended : [NSNumber numberWithInt:0],
                     @"floorsDescended": [CMPedometer isFloorCountingAvailable] && pedometerData.floorsDescended ? pedometerData.floorsDescended : [NSNumber numberWithInt:0]

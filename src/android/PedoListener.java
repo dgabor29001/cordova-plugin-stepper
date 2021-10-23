@@ -3,6 +3,7 @@ package org.apache.cordova.stepper;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
+import java.time.OffsetDateTime;
 
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.CallbackContext;
@@ -122,9 +123,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       setGoal(args);
       callbackContext.success();
     }
-    else if (action.equals("getSteps")) {
-      getSteps(args);
-    }
     else if (action.equals("getStepsByPeriod")) {
       getStepsByPeriod(args);
     }
@@ -186,37 +184,12 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     }
   }
 
-  private void getSteps(JSONArray args) {
-    long date = 0;
-    try {
-      date = args.getLong(0);
-    }
-    catch (JSONException e) {
-      e.printStackTrace();
-      return;
-    }
-
-    Database db = Database.getInstance(getActivity());
-    int steps = db.getSteps(date);
-    db.close();
-
-    JSONObject joresult = new JSONObject();
-    try {
-      joresult.put("steps", steps);
-    }
-    catch (JSONException e) {
-      e.printStackTrace();
-      return;
-    }
-    callbackContext.success(joresult);
-  }
-
   private void getStepsByPeriod(JSONArray args) {
     long startdate = 0;
     long endate = 0;
     try {
-      startdate = args.getLong(0);
-      endate = args.getLong(1);
+      startdate = OffsetDateTime.parse(args.getString(0)).toEpochSecond();
+      endate = OffsetDateTime.parse(args.getString(1)).toEpochSecond();
     }
     catch (JSONException e) {
       e.printStackTrace();
