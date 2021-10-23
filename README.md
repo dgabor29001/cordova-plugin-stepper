@@ -149,13 +149,16 @@ function error () {
 ## Platform and device support
 
 - Android
-- iOS not supported. Highly recommendation, use a plugin https://github.com/leecrossley/cordova-plugin-pedometer to implement a pedometer on iOS and combine these plugins in your application with platforms conditions.
+- iOS
 
 ## Credits
 Icons made by authors from https://www.flaticon.com is licensed by http://creativecommons.org/licenses/by/3.0/
 
 ## License
 
+Copyright (c) 2021, Félicien François
+
+Project based on source code and includes parts of source code https://github.com/achubutkin/cordova-plugin-stepper
 Copyright (c) 2019, Alexandr Chubutkin
 
 Project based on source code and includes parts of source code https://github.com/j4velin/Pedometer 
