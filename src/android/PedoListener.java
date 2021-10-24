@@ -190,8 +190,8 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     long today = Util.getToday();
     int steps = 0;
     try {
-      startdate = OffsetDateTime.parse(args.getString(0)).toEpochSecond();
-      endate = OffsetDateTime.parse(args.getString(1)).toEpochSecond();
+      startdate = OffsetDateTime.parse(args.getString(0)).toEpochSecond() * 1000;
+      endate = OffsetDateTime.parse(args.getString(1)).toEpochSecond() * 1000;
     }
     catch (JSONException e) {
       e.printStackTrace();
@@ -211,8 +211,11 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     JSONObject joresult = new JSONObject();
     try {
         joresult.put("steps", steps);
-        joresult.put("startdate", startdate);
-        joresult.put("endate", endate);
+        joresult.put("startDate", args.getString(0));
+        joresult.put("endDate", args.getString(1));
+        joresult.put("startEpoch", startdate);
+        joresult.put("endEpoch", endEpoch);
+        joresult.put("today", Util.getToday());
         joresult.put("todayOffset", todayOffset);
         joresult.put("since_boot", since_boot);
     }
