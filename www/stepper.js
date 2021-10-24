@@ -63,15 +63,17 @@ Stepper.prototype.getDaysWithoutToday = function (onSuccess, onError) {
 
 // IOS & Android - Documented
 Stepper.prototype.getSteps = function (date, onSuccess, onError) {
-	const startDate = 1000*3600*24*Math.floor(new Date(date || new Date()).getTime()/(1000*3600*24));
-	const endDate = 1000*3600*24*Math.ceil(new Date(date || new Date()).getTime()/(1000*3600*24)) - 1;
-    return this.getStepsByPeriod(startDate, endDate, onSuccess, onError);
+    return this.getStepsByPeriod(date || new Date(), date, onSuccess, onError);
 };
 
-// Android - Behave wierd - Documented
+// IOS & Android - Documented
 Stepper.prototype.getStepsByPeriod = function (start, end, onSuccess, onError) {
+	const startDate = new Date(start || 0);
+	startDate.setHours(0, 0, 0, 0);
+	const endDate = new Date(end || new Date());
+	endDate.setHours(23, 59, 59, 999);
     let promise = new Promise(function(resolve, reject) {
-        exec(resolve, reject, "Stepper", "getStepsByPeriod", [new Date(start || 0).toISOString(), new Date(end || 1000*3600*24*Math.ceil(new Date().getTime()/(1000*3600*24))).toISOString()]);
+        exec(resolve, reject, "Stepper", "getStepsByPeriod", [startDate.toISOString(), endDate.toISOString()]);
     });
     if (onSuccess) promise = promise.then(onSuccess);
     if (onError) promise = promise.catch(onError);
