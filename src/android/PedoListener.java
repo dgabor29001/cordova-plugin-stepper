@@ -110,7 +110,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       }
     } else if (action.equals("startStepperUpdates")) {
       setPrefs(args);
-      getAuth();
+      requestPermission();
     }
     else if (action.equals("stopStepperUpdates")) {
       stop();
@@ -276,8 +276,8 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     Log.i("TAG", "onReset");
   }
 
-  private void getAuth () {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+  public void requestPermission () {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
       cordova.requestPermission(this, REQUEST_DYN_PERMS, Manifest.permission.ACTIVITY_RECOGNITION);
     } else {
       start();
