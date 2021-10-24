@@ -214,7 +214,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
         joresult.put("startDate", args.getString(0));
         joresult.put("endDate", args.getString(1));
         joresult.put("startEpoch", startdate);
-        joresult.put("endEpoch", endEpoch);
+        joresult.put("endEpoch", endate);
         joresult.put("today", Util.getToday());
         joresult.put("todayOffset", todayOffset);
         joresult.put("since_boot", since_boot);
