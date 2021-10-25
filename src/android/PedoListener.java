@@ -341,6 +341,13 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     }
 
     try {
+      goal = args.getInt(0);
+      if (goal >= 0) {
+        prefs.edit().putInt(PedoListener.GOAL_PREF_INT, goal).apply();
+      }
+    } catch (JSONException e) {}
+    
+    try {
     	startOffset = options.getInt("offset");
     } catch(JSONException e) {}
     
