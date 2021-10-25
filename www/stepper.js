@@ -38,7 +38,7 @@ Stepper.prototype.startStepperUpdates = function (offset, onSuccess, onError, op
 			onSuccess = onError;
 			onError = options;
 		}
-	    opts.offset = parseInt(offset) || undefined;
+	    opts.offset = offset;
 	}
     let promise = new Promise(function(resolve, reject) {
 	    exec(resolve, reject, "Stepper", "startStepperUpdates", [opts]);
