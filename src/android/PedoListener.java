@@ -60,7 +60,8 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
   private int status;
 
-  private int startOffset = 0, todayOffset, total_start, goal, since_boot, total_days;
+  private Integer startOffset;
+  private int todayOffset, total_start, goal, since_boot, total_days;
   public final static NumberFormat formatter = NumberFormat.getInstance(Locale.getDefault());
 
   private SensorManager sensorManager;      // Sensor manager
@@ -340,7 +341,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     }
 
     try {
-    	prefs.edit().putInt("startOffset", options.getInt("offset")).commit();
+    	startOffset = options.getInt("offset");
     } catch(JSONException e) {}
     
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
@@ -386,9 +387,12 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
     Database db = Database.getInstance(getActivity());
 
-    int todaySteps = db.getSteps(Util.getToday());
-    todayOffset = todaySteps - prefs.getInt("startOffset", todaySteps < -200000 ? 0 : todaySteps);
-
+    int todayOffset = db.getSteps(Util.getToday());
+    if (startOffset != null) {
+    	todayOffset -= startOffset;
+    } else if (todayOffset > -200000) {
+    	todayOffset = 0;
+    }
     SharedPreferences prefs =
       getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
 
