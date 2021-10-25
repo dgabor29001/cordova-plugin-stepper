@@ -312,7 +312,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   }
   
   private void start(JSONArray args) throws JSONException {
-    startOffset = args.getInt(0);
     final JSONObject options = args.getJSONObject(1);
 
     // If already starting or running, then return
@@ -340,8 +339,10 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       prefs.edit().putString(PEDOMETER_YOUR_PROGRESS_FORMAT_TEXT, options.getString(PEDOMETER_YOUR_PROGRESS_FORMAT_TEXT)).commit();
     }
 
-    prefs.edit().putInt("startOffset", startOffset).commit();
-
+    try {
+    	prefs.edit().putInt("startOffset", options.getInt("offset")).commit();
+    } catch(JSONException e) {}
+    
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
       cordova.requestPermission(this, REQUEST_DYN_PERMS, Manifest.permission.ACTIVITY_RECOGNITION);
       return;
@@ -385,7 +386,8 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
     Database db = Database.getInstance(getActivity());
 
-    todayOffset = db.getSteps(Util.getToday());
+    int todaySteps = db.getSteps(Util.getToday());
+    todayOffset = todaySteps - prefs.getInt("startOffset", todaySteps));
 
     SharedPreferences prefs =
       getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);

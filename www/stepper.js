@@ -30,14 +30,18 @@ Stepper.prototype.requestPermission = function (onSuccess, onError) {
 // IOS & Android - Documented
 Stepper.prototype.startStepperUpdates = function (offset, onSuccess, onError, options) {
 	let opts = options || {};
-	if (typeof(onSuccess) === "object") {
-		opts = onSuccess;
-		onSuccess = onError;
-		onError = options;
+	if (typeof(offset) === "object") {
+		opts = offset;
+	} else {
+		if (typeof(onSuccess) === "object") {
+			opts = onSuccess;
+			onSuccess = onError;
+			onError = options;
+		}
+	    opts.offset = parseInt(offset) || undefined;
 	}
-    offset = parseInt(offset) || 0;
     let promise = new Promise(function(resolve, reject) {
-	    exec(resolve, reject, "Stepper", "startStepperUpdates", [offset, opts]);
+	    exec(resolve, reject, "Stepper", "startStepperUpdates", [opts]);
 	});
 	if (onSuccess) promise = promise.then(onSuccess);
     if (onError) promise = promise.catch(onError);

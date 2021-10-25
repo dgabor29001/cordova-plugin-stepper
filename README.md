@@ -50,12 +50,15 @@ stepper.requestPermission().then((result) => {
 
 ```
 
+#### startStepperUpdates (offset, onSuccess, onError, options)
 #### startStepperUpdates (offset, options) => Promise
+#### startStepperUpdates (options) => Promise
 Run with options and listener data updates. The success handler is called once during the first call and then called from the background thread whenever data is available.
 
 The method also creates a background service with notification (Android only).
 
 The `options` parameter may contain optional parameters. Below parameters recommended for notification localization (in Android platform):
+- offset - _int_ - the step count to starts with (Usually 0). Default to today's step count if available or 0 if not
 - pedometerIsCountingText - _string_ - Set title text for notification
 - pedometerStepsToGoFormatText - _string_ - Set description format string with text for notification
 - pedometerYourProgressFormatText - _string_ - Set progress description format string with text for notification
