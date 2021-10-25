@@ -313,7 +313,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   }
   
   private void start(JSONArray args) throws JSONException {
-    final JSONObject options = args.getJSONObject(1);
+    final JSONObject options = args.getJSONObject(0);
 
     // If already starting or running, then return
     if ((status == PedoListener.RUNNING) || (status == PedoListener.STARTING)) {
