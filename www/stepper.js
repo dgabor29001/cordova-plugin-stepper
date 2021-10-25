@@ -15,10 +15,33 @@ Stepper.prototype.isStepCountingAvailable = function (onSuccess, onError) {
 };
 
 // IOS & Android - Documented
+Stepper.prototype.requestPermission = function (onSuccess, onError) {
+	if(process.env.CORDOVA_PLATFORM !== "android") {
+	  return onSuccess(true);
+    }
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "requestPermission", []);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
+};
+
+// IOS & Android - Documented
 Stepper.prototype.startStepperUpdates = function (offset, onSuccess, onError, options) {
+	let opts = options || {};
+	if (typeof(onSuccess) === "object") {
+		opts = onSuccess;
+		onSuccess = onError;
+		onError = options;
+	}
     offset = parseInt(offset) || 0;
-    options = options || {};
-    exec(onSuccess, onError, "Stepper", "startStepperUpdates", [offset, options]);
+    let promise = new Promise(function(resolve, reject) {
+	    exec(resolve, reject, "Stepper", "startStepperUpdates", [offset, opts]);
+	});
+	if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // IOS & Android - Documented

@@ -21,7 +21,34 @@ cordova plugin add https://github.com/achubutkin/cordova-plugin-stepper
 ```
 ## Usage
 
-#### startStepperUpdates (offset, successCallback, errorCallback, options) 
+#### isStepCountingAvailable () => Promise
+Check if Pedometer sensor is available on the device
+
+```js
+stepper.isStepCountingAvailable().then((result) => {
+  if(result) console.log("Available !");
+  else console.log("Not available :-S");
+}).catch((err) => {
+  console.error(err);
+});
+
+```
+
+#### requestPermission () => Promise [Android only]
+Android only : request for ACTIVITY_RECOGNITION permission (trigger a native dialog on Android 10+)
+Required to run before startStepperUpdates on android
+
+```js
+stepper.requestPermission().then((result) => {
+  if(result) console.log("Authorized !");
+  else console.log("Denied :-S");
+}).catch((err) => {
+  console.error(err);
+});
+
+```
+
+#### startStepperUpdates (offset, options) => Promise
 Run with options and listener data updates. The success handler is called once during the first call and then called from the background thread whenever data is available.
 
 The method also creates a background service with notification (Android only).
@@ -41,17 +68,26 @@ var offset = 0, options = {
     pedometerGoalReachedFormatText: '%s steps today', // available variables: [todaySteps, goal]. Insert using %1$s, %2$s placeholders
   };
   
-stepper.startStepperUpdates(offset, success, error, options);
-
-function success (result) {
+stepper.startStepperUpdates(offset, options).then((result) => {
   var stepsToday = result.steps_today;
-}
-function error (err) {
+}).catch((err) => {
   console.error(err);
-}
+});
+
 ```
 
-_Note: When the application is suspended, the call to handlers is temporarily suspended. When the application is closed, the background service continues to work (in Android platform). The background service continues after the device is restarted._
+_Note: When the application is suspended, the call to handlers is temporarily suspended. When the application is closed, the background service continues to work (in Android platform) but the callbacks to you app may be stopped. The background service continues after the device is restarted._
+
+In order to keep callbacks after restarting or resuming your app you have to reattach background service by calling `startStepperUpdates`
+```js
+document.addEventListener("resume", () => {  
+	stepper.startStepperUpdates(offset, options).then(callback).catch((err) => {
+	  console.error(err);
+	});
+});
+
+```
+
 
 _To stop the background service, call the method `stopStepperUpdates`. When you open an application and call the launch method again, it joins the current background service._
 

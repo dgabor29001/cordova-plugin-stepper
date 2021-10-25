@@ -108,7 +108,9 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
         this.fail(PedoListener.ERROR_NO_SENSOR_FOUND, "Not Step counter sensor found");
         return true;
       }
-    } else if (action.equals("startStepperUpdates")) {
+    } else if (action.equals("requestPermission")) {
+      requestPermission();
+    } if (action.equals("startStepperUpdates")) {
       setPrefs(args);
       requestPermission();
     }
@@ -276,7 +278,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     Log.i("TAG", "onReset");
   }
 
-  public void requestPermission () {
+  public void requestPermission() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
       cordova.requestPermission(this, REQUEST_DYN_PERMS, Manifest.permission.ACTIVITY_RECOGNITION);
     } else {
@@ -305,7 +307,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     }
   }
   
-  private void setPrefs(JSONArray args) throws JSONException {
+  private void start(JSONArray args) throws JSONException {
     startOffset = args.getInt(0);
     final JSONObject options = args.getJSONObject(1);
 
@@ -335,9 +337,12 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     }
 
     prefs.edit().putInt("startOffset", startOffset).commit();
-  }
-  
-  private void start() {
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
+        fail(PedoListener.ERROR_NO_PERMISSION, "Don't have permission");
+        return;
+    }
+    
     if (Build.VERSION.SDK_INT >= 26) {
       API26Wrapper.startForegroundService(getActivity(),
         new Intent(getActivity(), SensorListener.class));
