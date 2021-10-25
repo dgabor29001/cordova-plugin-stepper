@@ -51,8 +51,7 @@ stepper.requestPermission().then((result) => {
 ```
 
 #### startStepperUpdates (offset, onSuccess, onError, options)
-#### startStepperUpdates (offset, options) => Promise
-#### startStepperUpdates (options) => Promise
+#### startStepperUpdates (options, onSuccess, onError)
 Run with options and listener data updates. The success handler is called once during the first call and then called from the background thread whenever data is available.
 
 The method also creates a background service with notification (Android only).

@@ -32,20 +32,10 @@ Stepper.prototype.startStepperUpdates = function (offset, onSuccess, onError, op
 	let opts = options || {};
 	if (typeof(offset) === "object") {
 		opts = offset;
-	} else {
-		if (typeof(onSuccess) === "object") {
-			opts = onSuccess;
-			onSuccess = onError;
-			onError = options;
-		}
+	} else if (typeof(opts.offset) === "undefined" && typeof(offset) !== "undefined") {
 	    opts.offset = offset;
 	}
-    let promise = new Promise(function(resolve, reject) {
-	    exec(resolve, reject, "Stepper", "startStepperUpdates", [opts]);
-	});
-	if (onSuccess) promise = promise.then(onSuccess);
-    if (onError) promise = promise.catch(onError);
-    return promise;
+	exec(onSuccess, onError, "Stepper", "startStepperUpdates", [opts]);
 };
 
 // IOS & Android - Documented
