@@ -35,8 +35,10 @@ stepper.isStepCountingAvailable().then((result) => {
 ```
 
 #### requestPermission () => Promise [Android only]
-Android only : request for ACTIVITY_RECOGNITION permission (trigger a native dialog on Android 10+)
-Required to run before startStepperUpdates on android
+Android: request for permission by anticipation
+IOS: return true and do nothing
+This can be helpful to request permission before starting the stepper.
+It can also prevent unexpected detachment at first start (Permission popup trigger a pause/resume cycle which can leads to service detachment)
 
 ```js
 stepper.requestPermission().then((result) => {
@@ -80,6 +82,13 @@ _Note: When the application is suspended, the call to handlers is temporarily su
 
 In order to keep callbacks after restarting or resuming your app you have to reattach background service by calling `startStepperUpdates`
 ```js
+// Reattach on reboot (required)
+document.addEventListener("deviceready", () => {  
+	stepper.startStepperUpdates(offset, options).then(callback).catch((err) => {
+	  console.error(err);
+	});
+});
+// Reattach after pause/resume (which can sometimes lead to dettachment)
 document.addEventListener("resume", () => {  
 	stepper.startStepperUpdates(offset, options).then(callback).catch((err) => {
 	  console.error(err);

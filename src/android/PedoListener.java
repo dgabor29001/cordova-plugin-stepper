@@ -39,6 +39,7 @@ import android.util.Pair;
 public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
   public static int REQUEST_DYN_PERMS = 101;
+  public static int REQUEST_MAN_PERMS = 102;
 
   public static int STOPPED = 0;
   public static int STARTING = 1;
@@ -101,7 +102,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
       sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
       if (sensor != null) {
-    	this.win(true);
+        this.win(true);
         return true;
       } else {
         this.status = PedoListener.ERROR_NO_SENSOR_FOUND;
@@ -111,8 +112,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     } else if (action.equals("requestPermission")) {
       requestPermission();
     } if (action.equals("startStepperUpdates")) {
-      setPrefs(args);
-      requestPermission();
+      start(args);
     }
     else if (action.equals("stopStepperUpdates")) {
       stop();
@@ -201,13 +201,13 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     }
 
     if (startdate < today) {
-	    Database db = Database.getInstance(getActivity());
-	    steps = db.getSteps(startdate, endate);
-	    db.close();
+        Database db = Database.getInstance(getActivity());
+        steps = db.getSteps(startdate, endate);
+        db.close();
     }
 
     if (startdate <= today && endate >= today) {
-    	steps += Math.max(todayOffset + since_boot, 0);
+        steps += Math.max(todayOffset + since_boot, 0);
     }
     
     JSONObject joresult = new JSONObject();
@@ -280,16 +280,16 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
   public void requestPermission() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
-      cordova.requestPermission(this, REQUEST_DYN_PERMS, Manifest.permission.ACTIVITY_RECOGNITION);
+      cordova.requestPermission(this, REQUEST_MAN_PERMS, Manifest.permission.ACTIVITY_RECOGNITION);
     } else {
-      start();
+      win(true);
     }
   }
 
   // called when the dynamic permissions are asked
   @Override
   public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
-    if (requestCode == REQUEST_DYN_PERMS) {
+    if (requestCode == REQUEST_DYN_PERMS || requestCode == REQUEST_MAN_PERMS) {
       for (int i = 0; i < grantResults.length; i++) {
         if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
           String errmsg = "Permission denied ";
@@ -303,7 +303,11 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       }
       // all dynamic permissions accepted!
       Log.i("TAG", "Dynamic permissions accepted");
-      start();
+      if (requestCode == REQUEST_MAN_PERMS) {
+        win(true);
+      } else {
+        start();
+      }
     }
   }
   
@@ -339,18 +343,22 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     prefs.edit().putInt("startOffset", startOffset).commit();
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
-        fail(PedoListener.ERROR_NO_PERMISSION, "Don't have permission");
-        return;
+      cordova.requestPermission(this, REQUEST_DYN_PERMS, Manifest.permission.ACTIVITY_RECOGNITION);
+      return;
     }
     
+    start();
+  }
+  
+  private void start() {
     if (Build.VERSION.SDK_INT >= 26) {
-      API26Wrapper.startForegroundService(getActivity(),
-        new Intent(getActivity(), SensorListener.class));
-    } else {
-      getActivity().startService(new Intent(getActivity(), SensorListener.class));
-    }
+        API26Wrapper.startForegroundService(getActivity(),
+          new Intent(getActivity(), SensorListener.class));
+      } else {
+        getActivity().startService(new Intent(getActivity(), SensorListener.class));
+      }
 
-    initSensor();
+      initSensor();
   }
 
   private void stop() {
