@@ -486,6 +486,9 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       result.put("steps_today", steps_today);
       result.put("total", total);
       result.put("average", average);
+      result.put("startOffset", startOffset);
+      result.put("todayOffset", todayOffset);
+      result.put("since_boot", since_boot);
     } catch (JSONException e) {
       e.printStackTrace();
     }
