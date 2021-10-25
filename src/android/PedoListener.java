@@ -387,7 +387,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     Database db = Database.getInstance(getActivity());
 
     int todaySteps = db.getSteps(Util.getToday());
-    todayOffset = todaySteps - prefs.getInt("startOffset", todaySteps));
+    todayOffset = todaySteps - prefs.getInt("startOffset", todaySteps < -200000 ? 0 : todaySteps);
 
     SharedPreferences prefs =
       getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
