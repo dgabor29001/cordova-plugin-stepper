@@ -11,13 +11,13 @@ The plugin also creates a background service with a neat and nice notification (
 #### Latest published version on npm (with Cordova CLI >= 5.0.0)
 
 ```
-cordova plugin add cordova-plugin-stepper
+cordova plugin add @felicienfrancois/cordova-plugin-stepper
 ```
 
 #### Latest version from GitHub
 
 ```
-cordova plugin add https://github.com/achubutkin/cordova-plugin-stepper
+cordova plugin add https://github.com/@felicienfrancois/cordova-plugin-stepper
 ```
 ## Usage
 
