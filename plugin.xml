@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-stepper" version="0.1.4">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="@felicienfrancois/cordova-plugin-stepper" version="0.1.4">
     <name>Stepper</name>
     <author>Felicien Francois</author>
     <description>Lightweight pedometer Cordova/Phonegap plugin for Android using the hardware step sensor, with notifications.</description>
