@@ -2,12 +2,13 @@
 <plugin id="@felicienfrancois/cordova-plugin-stepper"
     xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    version="0.2.2">
+    version="0.2.3">
     <name>Stepper</name>
     <author>Felicien Francois</author>
     <description>Lightweight pedometer Cordova/Phonegap plugin for Android using the hardware step sensor, with notifications.</description>
     <keywords>cordova, core motion, pedometer, steps, distance, pedestrian</keywords>
     <license>MIT</license>
+    <dependency id="cordova-plugin-device" />
     <engines>
         <engine name="cordova" version=">=3.0.0" />
     </engines>
