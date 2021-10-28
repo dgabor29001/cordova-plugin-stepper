@@ -1,5 +1,6 @@
 package org.apache.cordova.stepper;
 
+import android.annotation.SuppressLint;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
@@ -149,10 +150,11 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
    * Disables battery optimizations for the app.
    * Requires permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS to function.
    */
+  @SuppressLint("BatteryLife")
   private void disableBatteryOptimizations() {
       Intent intent     = new Intent();
       String pkgName    = getActivity().getPackageName();
-      PowerManager pm   = (PowerManager)getService(POWER_SERVICE);
+      PowerManager pm   = (PowerManager)getActivity().getSystemService(POWER_SERVICE);
 
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
 
