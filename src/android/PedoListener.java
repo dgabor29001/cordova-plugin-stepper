@@ -149,7 +149,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
    * Disables battery optimizations for the app.
    * Requires permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS to function.
    */
-  @SuppressLint("BatteryLife")
   private void disableBatteryOptimizations() {
       Intent intent     = new Intent();
       String pkgName    = getActivity().getPackageName();
