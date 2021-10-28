@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.net.Uri;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.app.Activity;
@@ -27,11 +28,15 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.PowerManager;
 import org.apache.cordova.stepper.util.API26Wrapper;
 
 import android.os.Build;
 import android.util.Log;
 import android.util.Pair;
+
+import static android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS;
+import static android.content.Context.POWER_SERVICE;
 
 /**
  * This class listens to the pedometer sensor
@@ -112,7 +117,9 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       }
     } else if (action.equals("requestPermission")) {
       requestPermission();
-    } if (action.equals("startStepperUpdates")) {
+    } else if (action.equals("disableBatteryOptimizations")) {
+      disableBatteryOptimizations();
+    } else if (action.equals("startStepperUpdates")) {
       start(args);
     }
     else if (action.equals("stopStepperUpdates")) {
@@ -136,6 +143,26 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       return false;
     }
     return true;
+  }
+  
+  /**
+   * Disables battery optimizations for the app.
+   * Requires permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS to function.
+   */
+  @SuppressLint("BatteryLife")
+  private void disableBatteryOptimizations() {
+      Intent intent     = new Intent();
+      String pkgName    = getActivity().getPackageName();
+      PowerManager pm   = (PowerManager)getService(POWER_SERVICE);
+
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
+
+      if (pm.isIgnoringBatteryOptimizations(pkgName)) return;
+
+      intent.setAction(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+      intent.setData(Uri.parse("package:" + pkgName));
+
+      getActivity().startActivity(intent);
   }
 
   private void setNotificationLocalizedStrings(JSONArray args) {

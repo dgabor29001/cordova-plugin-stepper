@@ -50,6 +50,13 @@ stepper.requestPermission().then((result) => {
 
 ```
 
+#### disableBatteryOptimizations () [Android only]
+Android: request for disabling battery optimizations
+
+```js
+stepper.disableBatteryOptimizations();
+```
+
 #### startStepperUpdates (offset, onSuccess, onError, options)
 #### startStepperUpdates (options, onSuccess, onError)
 Run with options and listener data updates. The success handler is called once during the first call and then called from the background thread whenever data is available.

@@ -16,7 +16,7 @@ Stepper.prototype.isStepCountingAvailable = function (onSuccess, onError) {
 
 // IOS & Android - Documented
 Stepper.prototype.requestPermission = function (onSuccess, onError) {
-	if(process.env.CORDOVA_PLATFORM !== "android") {
+	if(!/^android|amazon/i.test(device.platform)) {
 	  return onSuccess(true);
     }
     let promise = new Promise(function(resolve, reject) {
@@ -25,6 +25,14 @@ Stepper.prototype.requestPermission = function (onSuccess, onError) {
     if (onSuccess) promise = promise.then(onSuccess);
     if (onError) promise = promise.catch(onError);
     return promise;
+};
+
+// IOS & Android - Documented
+Stepper.prototype.disableBatteryOptimizations = function () {
+	if(!/^android|amazon/i.test(device.platform)) {
+	  return onSuccess(true);
+    }
+    exec(null, null, "Stepper", "disableBatteryOptimizations", []);
 };
 
 // IOS & Android - Documented
