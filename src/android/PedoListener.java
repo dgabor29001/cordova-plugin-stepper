@@ -46,6 +46,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
   public static int REQUEST_DYN_PERMS = 101;
   public static int REQUEST_MAN_PERMS = 102;
+  public static int REQUEST_BATTERY_PERMS = 103;
 
   public static int STOPPED = 0;
   public static int STARTING = 1;
@@ -106,16 +107,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     this.callbackContext = callbackContext;
 
     if (action.equals("isStepCountingAvailable")) {
-      sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-      sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-      if (sensor != null) {
-        this.win(true);
-        return true;
-      } else {
-        this.status = PedoListener.ERROR_NO_SENSOR_FOUND;
-        this.fail(PedoListener.ERROR_NO_SENSOR_FOUND, "Not Step counter sensor found");
-        return true;
-      }
+      isStepCountingAvailable();
     } else if (action.equals("requestPermission")) {
       requestPermission();
     } else if (action.equals("disableBatteryOptimizations")) {
@@ -171,11 +163,21 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 	      intent.setData(Uri.parse("package:" + pkgName));
 	      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	
-	      getActivity().startActivity(intent);
-		  callbackContext.success();
+	      cordova.startActivityForResult(this, intent, REQUEST_BATTERY_PERMS);
+	      answerLater();
 	  } catch(Exception e) {
 		  callbackContext.error(e.getMessage());
 	  }
+  }
+  
+  @Override
+  public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+	  if (requestCode == REQUEST_BATTERY_PERMS) {
+		  win(resultCode == cordova.getActivity().RESULT_OK);
+          return;
+	  }
+      // Handle other results if exists.
+      super.onActivityResult(requestCode, resultCode, data);
   }
 
   private void setNotificationLocalizedStrings(JSONArray args) {
@@ -319,14 +321,26 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     Log.i("TAG", "onReset");
   }
 
-  public void requestPermission() {
+  private void requestPermission() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
       cordova.requestPermission(this, REQUEST_MAN_PERMS, Manifest.permission.ACTIVITY_RECOGNITION);
+      answerLater();
     } else {
       win(true);
     }
   }
 
+  private void isStepCountingAvailable() {
+    sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+    sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+    if (sensor != null) {
+      this.win(true);
+    } else {
+      this.status = PedoListener.ERROR_NO_SENSOR_FOUND;
+      this.fail(PedoListener.ERROR_NO_SENSOR_FOUND, "Not Step counter sensor found");
+    }
+  }
+  
   // called when the dynamic permissions are asked
   @Override
   public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
@@ -537,9 +551,17 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       e.printStackTrace();
     }
 
-    win(result);
+    PluginResult r = new PluginResult(PluginResult.Status.OK, result);
+    r.setKeepCallback(true);
+    callbackContext.sendPluginResult(r);
   }
-
+  
+  private void answerLater() {
+    PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
+    pluginResult.setKeepCallback(true);
+    callbackContext.sendPluginResult(r);
+  }
+  
   private void win(JSONObject message) {
     // Success return object
     PluginResult result;
@@ -549,8 +571,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     else {
       result = new PluginResult(PluginResult.Status.OK);
     }
-
-    result.setKeepCallback(true);
     callbackContext.sendPluginResult(result);
   }
 
@@ -573,7 +593,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       e.printStackTrace();
     }
     PluginResult err = new PluginResult(PluginResult.Status.ERROR, errorObj);
-    err.setKeepCallback(true);
     callbackContext.sendPluginResult(err);
   }
 
