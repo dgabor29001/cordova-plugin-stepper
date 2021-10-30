@@ -152,18 +152,28 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
    */
   @SuppressLint("BatteryLife")
   private void disableBatteryOptimizations() {
-      Intent intent     = new Intent();
-      String pkgName    = getActivity().getPackageName();
-      PowerManager pm   = (PowerManager)getActivity().getSystemService(POWER_SERVICE);
-
-      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
-
-      if (pm.isIgnoringBatteryOptimizations(pkgName)) return;
-
-      intent.setAction(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-      intent.setData(Uri.parse("package:" + pkgName));
-
-      getActivity().startActivity(intent);
+	  try {
+	      Intent intent     = new Intent();
+	      String pkgName    = getActivity().getPackageName();
+	      PowerManager pm   = (PowerManager)getActivity().getSystemService(POWER_SERVICE);
+	
+	      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+	    	  return callbackContext.success(false);
+	      }
+	
+	      if (pm.isIgnoringBatteryOptimizations(pkgName)) {
+	    	  return callbackContext.success(false);
+	      }
+	
+	      intent.setAction(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+	      intent.setData(Uri.parse("package:" + pkgName));
+	      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	
+	      getActivity().startActivity(intent);
+		  return callbackContext.success(true);
+	  } catch(error) {
+		  callbackContext.success(false);
+	  }
   }
 
   private void setNotificationLocalizedStrings(JSONArray args) {

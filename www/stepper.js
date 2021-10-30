@@ -28,11 +28,11 @@ Stepper.prototype.requestPermission = function (onSuccess, onError) {
 };
 
 // IOS & Android - Documented
-Stepper.prototype.disableBatteryOptimizations = function () {
+Stepper.prototype.disableBatteryOptimizations = function (onSuccess, onError) {
 	if(!/^android|amazon/i.test(device.platform)) {
-	  return onSuccess(true);
+	  return onSuccess(false);
     }
-    exec(null, null, "Stepper", "disableBatteryOptimizations", []);
+    exec(onSuccess, onError, "Stepper", "disableBatteryOptimizations", []);
 };
 
 // IOS & Android - Documented

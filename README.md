@@ -50,11 +50,17 @@ stepper.requestPermission().then((result) => {
 
 ```
 
-#### disableBatteryOptimizations () [Android only]
+#### disableBatteryOptimizations () => Promise [Android only]
 Android: request for disabling battery optimizations
+IOS: return false and do nothing
 
 ```js
-stepper.disableBatteryOptimizations();
+stepper.disableBatteryOptimizations().then((result) => {
+  if(result) console.log("Authorized !");
+  else console.log("Denied :-S");
+}).catch((err) => {
+  console.error(err);
+});
 ```
 
 #### startStepperUpdates (offset, onSuccess, onError, options)
