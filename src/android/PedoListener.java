@@ -172,7 +172,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 	      getActivity().startActivity(intent);
 		  return callbackContext.success();
 	  } catch(Exception e) {
-		  callbackContext.fail(e.getMessage());
+		  callbackContext.error(e.getMessage());
 	  }
   }
 
