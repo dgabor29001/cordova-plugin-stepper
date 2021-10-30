@@ -57,8 +57,9 @@ IOS: return false and do nothing
 ```js
 stepper.disableBatteryOptimizations().then((result) => {
   if(result) console.log("Authorized !");
-  else console.log("Denied :-S");
+  else console.log("Not available or Denied :-S");
 }).catch((err) => {
+  // Should never happen as error are catched and return false in success
   console.error(err);
 });
 ```
