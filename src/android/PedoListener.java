@@ -76,6 +76,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   private Sensor sensor;                    // Pedometer sensor returned by sensor manager
 
   private CallbackContext callbackContext;  // Keeps track of the JS callback context.
+  private CallbackContext updateCallback;  // Keeps track of the persistent callback.
 
   /**
    * Constructor
@@ -114,6 +115,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     } else if (action.equals("disableBatteryOptimizations")) {
       disableBatteryOptimizations();
     } else if (action.equals("startStepperUpdates")) {
+      this.updateCallback = callbackContext;
       start(args);
     }
     else if (action.equals("stopStepperUpdates")) {
@@ -372,6 +374,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
     // If already starting or running, then return
     if ((status == PedoListener.RUNNING) || (status == PedoListener.STARTING)) {
+      updateUI();
       return;
     }
 
@@ -408,6 +411,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
       cordova.requestPermission(this, REQUEST_DYN_PERMS, Manifest.permission.ACTIVITY_RECOGNITION);
+      answerLater();
       return;
     }
     
@@ -444,6 +448,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     // If already starting or running, then return
     if ((status == PedoListener.RUNNING) || (status == PedoListener.STARTING)
       && status != PedoListener.PAUSED) {
+      updateUI();
       return;
     }
 
@@ -552,7 +557,9 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       e.printStackTrace();
     }
 
-    win(result);
+    PluginResult r = new PluginResult(PluginResult.Status.OK, result);
+    r.setKeepCallback(true);
+    updateCallback.sendPluginResult(r);
   }
   
   private void answerLater() {
@@ -569,19 +576,16 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     else {
       result = new PluginResult(PluginResult.Status.OK);
     }
-    result.setKeepCallback(true);
     callbackContext.sendPluginResult(result);
   }
 
   private void win(boolean success) {
     PluginResult result = new PluginResult(PluginResult.Status.OK, success);
-    result.setKeepCallback(true);
     callbackContext.sendPluginResult(result);
   }
 
   private void win() {
     PluginResult result = new PluginResult(PluginResult.Status.OK);
-    result.setKeepCallback(true);
     callbackContext.sendPluginResult(result);
   }
 
@@ -595,7 +599,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       e.printStackTrace();
     }
     PluginResult err = new PluginResult(PluginResult.Status.ERROR, errorObj);
-    err.setKeepCallback(true);
     callbackContext.sendPluginResult(err);
   }
 
