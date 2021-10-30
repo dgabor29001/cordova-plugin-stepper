@@ -460,6 +460,9 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     } else if (todayOffset > -200000) {
     	todayOffset = 0;
     }
+    // Save offset to db
+    db.insertDayFromBackup(Util.getToday(), todayOffset);
+	
     SharedPreferences prefs =
       getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
 
