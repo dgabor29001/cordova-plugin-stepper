@@ -487,7 +487,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
         }
       }).create().show();
     } else {
-      sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI, 0);
+      sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST, 0);
     }
 
     since_boot -= pauseDifference;

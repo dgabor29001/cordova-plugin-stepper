@@ -233,8 +233,8 @@ public class SensorListener extends Service implements SensorEventListener {
       if (sm.getSensorList(Sensor.TYPE_STEP_COUNTER).size() < 1) return; // emulator
     }
 
-    // enable batching with delay of max 5 min
+    // enable batching with delay of max 2 min
     sm.registerListener(this, sm.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
-      SensorManager.SENSOR_DELAY_UI, (int) (5 * MICROSECONDS_IN_ONE_MINUTE));
+      SensorManager.SENSOR_DELAY_UI, (int) (2 * MICROSECONDS_IN_ONE_MINUTE));
   }
 }
