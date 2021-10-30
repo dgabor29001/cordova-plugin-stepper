@@ -158,11 +158,11 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 	      PowerManager pm   = (PowerManager)getActivity().getSystemService(POWER_SERVICE);
 	
 	      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-	    	  return callbackContext.success(false);
+	    	  return callbackContext.fail("Not available");
 	      }
 	
 	      if (pm.isIgnoringBatteryOptimizations(pkgName)) {
-	    	  return callbackContext.success(false);
+	    	  return callbackContext.success();
 	      }
 	
 	      intent.setAction(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
@@ -170,9 +170,9 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 	      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	
 	      getActivity().startActivity(intent);
-		  return callbackContext.success(true);
+		  return callbackContext.success();
 	  } catch(Exception e) {
-		  callbackContext.success(false);
+		  callbackContext.fail(e.getMessage());
 	  }
   }
 

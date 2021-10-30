@@ -16,10 +16,10 @@ Stepper.prototype.isStepCountingAvailable = function (onSuccess, onError) {
 
 // IOS & Android - Documented
 Stepper.prototype.requestPermission = function (onSuccess, onError) {
-	if(!/^android|amazon/i.test(device.platform)) {
-	  return onSuccess(true);
-    }
     let promise = new Promise(function(resolve, reject) {
+		if(!/^android|amazon/i.test(device.platform)) {
+		  return resolve(true);
+	    }
         exec(resolve, reject, "Stepper", "requestPermission", []);
     });
     if (onSuccess) promise = promise.then(onSuccess);
@@ -29,10 +29,15 @@ Stepper.prototype.requestPermission = function (onSuccess, onError) {
 
 // IOS & Android - Documented
 Stepper.prototype.disableBatteryOptimizations = function (onSuccess, onError) {
-	if(!/^android|amazon/i.test(device.platform)) {
-	  return onSuccess(false);
-    }
-    exec(onSuccess, onError, "Stepper", "disableBatteryOptimizations", []);
+    let promise = new Promise(function(resolve) {
+		if(!/^android|amazon/i.test(device.platform)) {
+		  return resolve(false);
+	    }
+        exec(() => resolve(true), () => resolve(false), "Stepper", "disableBatteryOptimizations", []);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
 };
 
 // IOS & Android - Documented
