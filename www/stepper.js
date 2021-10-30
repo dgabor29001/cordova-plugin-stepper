@@ -33,7 +33,13 @@ Stepper.prototype.disableBatteryOptimizations = function (onSuccess, onError) {
 		if(!/^android|amazon/i.test(device.platform)) {
 		  return resolve(false);
 	    }
-        exec(() => resolve(true), () => resolve(false), "Stepper", "disableBatteryOptimizations", []);
+        exec((result) => {
+          console.log("disableBatteryOptimizations", result);
+          resolve(true);
+        }, (error) => {
+          console.error("disableBatteryOptimizations", error);
+          resolve(false)
+        }, "Stepper", "disableBatteryOptimizations", []);
     });
     if (onSuccess) promise = promise.then(onSuccess);
     if (onError) promise = promise.catch(onError);
