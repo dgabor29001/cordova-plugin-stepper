@@ -54,6 +54,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   public static int ERROR_FAILED_TO_START = 3;
   public static int ERROR_NO_SENSOR_FOUND = 4;
   public static int ERROR_NO_PERMISSION = 3;
+  public static int ERROR_BATTERY_OPTIMIZATION = 6;
   public static int PAUSED = 5;
 
   public static int DEFAULT_GOAL = 0;
@@ -120,11 +121,11 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     }
     else if (action.equals("setNotificationLocalizedStrings")) {
       setNotificationLocalizedStrings(args);
-      callbackContext.success();
+      win();
     }
     else if (action.equals("setGoal")) {
       setGoal(args);
-      callbackContext.success();
+      win();
     }
     else if (action.equals("getStepsByPeriod")) {
       getStepsByPeriod(args);
@@ -150,12 +151,12 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 	      PowerManager pm   = (PowerManager)getActivity().getSystemService(POWER_SERVICE);
 	
 	      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-	    	  callbackContext.error("Not available");
+	          this.fail(PedoListener.ERROR_BATTERY_OPTIMIZATION, "Permission not relevant on this device");
 	    	  return;
 	      }
 	
 	      if (pm.isIgnoringBatteryOptimizations(pkgName)) {
-	    	  callbackContext.success();
+	    	  win(true);
 	    	  return;
 	      }
 	
@@ -166,7 +167,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 	      cordova.startActivityForResult(this, intent, REQUEST_BATTERY_PERMS);
 	      answerLater();
 	  } catch(Exception e) {
-		  callbackContext.error(e.getMessage());
+          this.fail(PedoListener.ERROR_BATTERY_OPTIMIZATION, e.getMessage());
 	  }
   }
   
@@ -261,7 +262,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       e.printStackTrace();
       return;
     }
-    callbackContext.success(joresult);
+    win(joresult);
   }
 
   private void getLastEntries(JSONArray args) {
@@ -293,7 +294,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       e.printStackTrace();
       return;
     }
-    callbackContext.success(joresult);
+    win(joresult);
   }
 
   public void onStart() {
@@ -436,7 +437,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     getActivity().stopService(new Intent(getActivity(), SensorListener.class));
     status = PedoListener.STOPPED;
 
-    callbackContext.success();
+    win();
   }
 
   private void initSensor() {
@@ -551,9 +552,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       e.printStackTrace();
     }
 
-    PluginResult r = new PluginResult(PluginResult.Status.OK, result);
-    r.setKeepCallback(true);
-    callbackContext.sendPluginResult(r);
+    win(result);
   }
   
   private void answerLater() {
@@ -563,7 +562,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   }
   
   private void win(JSONObject message) {
-    // Success return object
     PluginResult result;
     if(message != null) {
       result = new PluginResult(PluginResult.Status.OK, message);
@@ -571,14 +569,18 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     else {
       result = new PluginResult(PluginResult.Status.OK);
     }
+    result.setKeepCallback(true);
     callbackContext.sendPluginResult(result);
   }
 
   private void win(boolean success) {
-    // Success return object
-    PluginResult result;
-    result = new PluginResult(PluginResult.Status.OK, success);
+    PluginResult result = new PluginResult(PluginResult.Status.OK, success);
+    result.setKeepCallback(true);
+    callbackContext.sendPluginResult(result);
+  }
 
+  private void win() {
+    PluginResult result = new PluginResult(PluginResult.Status.OK);
     result.setKeepCallback(true);
     callbackContext.sendPluginResult(result);
   }
@@ -593,6 +595,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       e.printStackTrace();
     }
     PluginResult err = new PluginResult(PluginResult.Status.ERROR, errorObj);
+    result.setKeepCallback(true);
     callbackContext.sendPluginResult(err);
   }
 
