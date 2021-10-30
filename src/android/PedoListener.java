@@ -167,6 +167,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 	      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	
 	      cordova.startActivityForResult(this, intent, REQUEST_BATTERY_PERMS);
+	      answerLater();
 	  } catch(Exception e) {
           this.fail(PedoListener.ERROR_BATTERY_OPTIMIZATION, e.getMessage());
 	  }
@@ -326,6 +327,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   private void requestPermission() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
       cordova.requestPermission(this, REQUEST_MAN_PERMS, Manifest.permission.ACTIVITY_RECOGNITION);
+      answerLater();
     } else {
       win(true);
     }
@@ -409,6 +411,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
       cordova.requestPermission(this, REQUEST_DYN_PERMS, Manifest.permission.ACTIVITY_RECOGNITION);
+      answerLater();
       return;
     }
     
@@ -557,6 +560,12 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     PluginResult r = new PluginResult(PluginResult.Status.OK, result);
     r.setKeepCallback(true);
     updateCallback.sendPluginResult(r);
+  }
+  
+  private void answerLater() {
+    PluginResult r = new PluginResult(PluginResult.Status.NO_RESULT);
+    r.setKeepCallback(true);
+    callbackContext.sendPluginResult(r);
   }
   
   private void win(JSONObject message) {
