@@ -245,15 +245,12 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       return;
     }
 
-    if (startdate < today) {
-        Database db = Database.getInstance(getActivity());
-        steps = db.getSteps(startdate, endate);
-        db.close();
-    }
-
+    Database db = Database.getInstance(getActivity());
+    steps = db.getSteps(startdate, endate);
     if (startdate <= today && endate >= today) {
-        steps += Math.max(todayOffset + since_boot, 0);
+        steps += Math.max(db.getCurrentSteps(), since_boot);
     }
+    db.close();
     
     JSONObject joresult = new JSONObject();
     try {
