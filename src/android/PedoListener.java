@@ -164,7 +164,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 	
 	      intent.setAction(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
 	      intent.setData(Uri.parse("package:" + pkgName));
-	      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	
 	      cordova.startActivityForResult(this, intent, REQUEST_BATTERY_PERMS);
 	      answerLater();
