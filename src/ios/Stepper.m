@@ -43,7 +43,7 @@
 {
     __block CDVPluginResult* pluginResult = nil;
     
-    NSDate* startDate = [[NSCalendar currentCalendar] startOfDayForDate:NSDate date];
+    NSDate* startDate = [[NSCalendar currentCalendar] startOfDayForDate:[NSDate date]];
     
     [self.pedometer startPedometerUpdatesFromDate:startDate withHandler:^(CMPedometerData *pedometerData, NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
