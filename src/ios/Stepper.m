@@ -43,7 +43,8 @@
 {
     __block CDVPluginResult* pluginResult = nil;
 
-    [self.pedometer startPedometerUpdatesFromDate:[NSDate date] withHandler:^(CMPedometerData *pedometerData, NSError *error) {
+    let startDate = Calendar.current.startOfDay(for: Date());
+    [self.pedometer startPedometerUpdatesFromDate:startDate withHandler:^(CMPedometerData *pedometerData, NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if (error)
             {
