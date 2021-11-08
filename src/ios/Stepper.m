@@ -84,7 +84,7 @@
     [dateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 
     NSDate* startDate = [dateFormatter dateFromString:[command.arguments objectAtIndex:0]];
-    NSDate* endDate = [dateFormatter dateFromString:[command.arguments objectAtIndex:0]];
+    NSDate* endDate = [dateFormatter dateFromString:[command.arguments objectAtIndex:1]];
 
     __block CDVPluginResult* pluginResult = nil;
 
