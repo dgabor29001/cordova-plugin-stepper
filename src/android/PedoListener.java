@@ -557,7 +557,11 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
     PluginResult r = new PluginResult(PluginResult.Status.OK, result);
     r.setKeepCallback(true);
-    updateCallback.sendPluginResult(r);
+    if (this.updateCallback != null) {
+    	this.updateCallback.sendPluginResult(r);
+    } else if (this.callbackContext != null) {
+    	this.callbackContext.sendPluginResult(r);    	
+    }
   }
   
   private void answerLater() {
