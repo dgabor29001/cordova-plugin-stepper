@@ -543,7 +543,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     // Today offset might still be Integer.MIN_VALUE on first start
     int steps_today = Math.max(todayOffset + since_boot, 0);
     int total = total_start + steps_today;
-    int average = (total_start + steps_today) / total_days;
+    int average = (total_start + steps_today) / Math.max(1, total_days);
 
     JSONObject result = new JSONObject();
 
