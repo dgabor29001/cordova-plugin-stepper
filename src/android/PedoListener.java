@@ -20,9 +20,7 @@ import android.net.Uri;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
@@ -336,7 +334,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       this.win(true);
     } else {
       this.status = PedoListener.ERROR_NO_SENSOR_FOUND;
-      this.fail(PedoListener.ERROR_NO_SENSOR_FOUND, "Not Step counter sensor found");
+      this.win(false);
     }
   }
   
@@ -469,19 +467,8 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
     sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
     if (sensor == null) {
-      new AlertDialog.Builder(getActivity()).setTitle("R.string.no_sensor")
-        .setMessage("R.string.no_sensor_explain")
-        .setOnDismissListener(new DialogInterface.OnDismissListener() {
-          @Override
-          public void onDismiss(final DialogInterface dialogInterface) {
-            getActivity().finish();
-          }
-        }).setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(final DialogInterface dialogInterface, int i) {
-          dialogInterface.dismiss();
-        }
-      }).create().show();
+      this.fail(PedoListener.ERROR_NO_SENSOR_FOUND, "Not Step counter sensor found");
+      return;
     } else {
       sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST, 0);
     }
