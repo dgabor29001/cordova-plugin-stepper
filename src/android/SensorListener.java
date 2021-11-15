@@ -169,7 +169,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
   public static Notification getNotification(final Context context) {
     SharedPreferences prefs = context.getSharedPreferences("pedometer", Context.MODE_PRIVATE);
-    Integer startOffset;
+    Integer startOffset = null;
     try {
       startOffset = Integer.valueOf(prefs.getString("startOffset", null));
     } catch(Throwable e) {}
