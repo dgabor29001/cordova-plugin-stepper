@@ -171,7 +171,7 @@ public class SensorListener extends Service implements SensorEventListener {
     SharedPreferences prefs = context.getSharedPreferences("pedometer", Context.MODE_PRIVATE);
     Integer startOffset;
     try {
-      startOffset = prefs.getInt("startOffset");
+      startOffset = Integer.valueOf(prefs.getString("startOffset", null));
     } catch(Throwable e) {}
     Database db = Database.getInstance(context);
     int today_offset = db.getSteps(Util.getToday());

@@ -401,7 +401,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     
     try {
     	startOffset = options.getInt("offset");
-        prefs.edit().putInt("startOffset", startOffset).commit();
+        prefs.edit().putString("startOffset", startOffset).commit();
     } catch(JSONException e) {}
     
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
