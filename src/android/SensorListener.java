@@ -169,8 +169,17 @@ public class SensorListener extends Service implements SensorEventListener {
 
   public static Notification getNotification(final Context context) {
     SharedPreferences prefs = context.getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+    Integer startOffset;
+    try {
+      startOffset = prefs.getInt("startOffset");
+    } catch(Throwable e) {}
     Database db = Database.getInstance(context);
     int today_offset = db.getSteps(Util.getToday());
+    if (startOffset != null && today_offset != Integer.MIN_VALUE) {
+    	today_offset -= startOffset;
+    } else if (today_offset > -200000) {
+    	today_offset = 0;
+    }
     if (steps == 0)
       steps = db.getCurrentSteps(); // use saved value if we haven't anything better
     db.close();
@@ -179,7 +188,14 @@ public class SensorListener extends Service implements SensorEventListener {
       Build.VERSION.SDK_INT >= 26 ? API26Wrapper.getNotificationBuilder(context) :
         new Notification.Builder(context);
     if (steps > 0) {
-      if (today_offset == Integer.MIN_VALUE) today_offset = -steps;
+      if (today_offset == Integer.MIN_VALUE) {
+        today_offset = -steps;
+	    if (startOffset != null && today_offset != Integer.MIN_VALUE) {
+	   	  today_offset -= startOffset;
+	    } else if (today_offset > -200000) {
+	      today_offset = 0;
+        }
+      }
       notificationBuilder.setProgress(goal, today_offset + steps, false).setContentText(
         today_offset + steps >= Math.max(goal,1) ?
           String.format(prefs.getString(PedoListener.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, "%s steps today"),

@@ -450,7 +450,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     Database db = Database.getInstance(getActivity());
 
     todayOffset = db.getSteps(Util.getToday());
-    if (startOffset != null) {
+    if (startOffset != null && todayOffset != Integer.MIN_VALUE) {
     	todayOffset -= startOffset;
     } else if (todayOffset > -200000) {
     	todayOffset = 0;
@@ -511,6 +511,11 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       // we don`t know when the reboot was, so set today`s steps to 0 by
       // initializing them with -STEPS_SINCE_BOOT
       todayOffset = -(int) event.values[0];
+      if (startOffset != null && todayOffset != Integer.MIN_VALUE) {
+      	todayOffset -= startOffset;
+      } else if (todayOffset > -200000) {
+      	todayOffset = 0;
+      }
       Database db = Database.getInstance(getActivity());
       db.insertNewDay(Util.getToday(), (int) event.values[0]);
       db.close();
