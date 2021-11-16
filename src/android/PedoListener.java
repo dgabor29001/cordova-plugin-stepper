@@ -454,7 +454,8 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     }
 
     Database db = Database.getInstance(getActivity());
-
+    SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+    
     todayOffset = db.getSteps(Util.getToday());
     if (startDay == Util.getToday()) {
       if (startOffset != null && todayOffset != Integer.MIN_VALUE) {
@@ -465,8 +466,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
         prefs.edit().putString("startOffset", startOffset.toString()).commit();
       }
     }
-    SharedPreferences prefs =
-      getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
 
     goal = prefs.getInt(PedoListener.GOAL_PREF_INT, PedoListener.DEFAULT_GOAL);
     since_boot = db.getCurrentSteps();
@@ -526,6 +525,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
         } else if (todayOffset > -200000) {
           todayOffset = 0;
           startOffset = -todayOffset;
+          SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
           prefs.edit().putString("startOffset", startOffset.toString()).commit();
         }
       }
