@@ -1,6 +1,6 @@
 {
   "name": "@felicienfrancois/cordova-plugin-stepper",
-  "version": "0.2.30",
+  "version": "0.2.31",
   "description": "Lightweight pedometer Cordova/Phonegap plugin for Android using the hardware step sensor, with notifications.",
   "cordova": {
     "id": "@felicienfrancois/cordova-plugin-stepper",
