@@ -176,7 +176,7 @@ public class SensorListener extends Service implements SensorEventListener {
     Database db = Database.getInstance(context);
     int today_offset = db.getSteps(Util.getToday());
     if (startOffset != null && today_offset != Integer.MIN_VALUE) {
-    	today_offset -= startOffset;
+    	today_offset += startOffset;
     } else if (today_offset > -200000) {
     	today_offset = 0;
     }
@@ -191,7 +191,7 @@ public class SensorListener extends Service implements SensorEventListener {
       if (today_offset == Integer.MIN_VALUE) {
         today_offset = -steps;
 	    if (startOffset != null && today_offset != Integer.MIN_VALUE) {
-	   	  today_offset -= startOffset;
+	   	  today_offset += startOffset;
 	    } else if (today_offset > -200000) {
 	      today_offset = 0;
         }

@@ -451,7 +451,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
     todayOffset = db.getSteps(Util.getToday());
     if (startOffset != null && todayOffset != Integer.MIN_VALUE) {
-    	todayOffset -= startOffset;
+    	todayOffset += startOffset;
     } else if (todayOffset > -200000) {
     	todayOffset = 0;
     }
@@ -512,7 +512,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       // initializing them with -STEPS_SINCE_BOOT
       todayOffset = -(int) event.values[0];
       if (startOffset != null && todayOffset != Integer.MIN_VALUE) {
-      	todayOffset -= startOffset;
+      	todayOffset += startOffset;
       } else if (todayOffset > -200000) {
       	todayOffset = 0;
       }
