@@ -249,6 +249,9 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     if (startdate <= today && endate >= today) {
         steps += Math.max(db.getCurrentSteps(), since_boot);
     }
+    if (startOffset != null && startdate <= startDay && endate >= startDay) {
+        steps += startOffset;
+    }
     db.close();
     
     JSONObject joresult = new JSONObject();
@@ -404,7 +407,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     prefs.edit().putLong("startDay", startDay).commit();
     try {
       startOffset = options.getInt("offset");
-        prefs.edit().putString("startOffset", startOffset.toString()).commit();
+      prefs.edit().putString("startOffset", startOffset.toString()).commit();
     } catch(JSONException e) {}
     
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
@@ -458,6 +461,8 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
         todayOffset += startOffset;
       } else if (todayOffset > -200000) {
         todayOffset = 0;
+        startOffset = -todayOffset;
+        prefs.edit().putString("startOffset", startOffset.toString()).commit();
       }
     }
     SharedPreferences prefs =
@@ -520,6 +525,8 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
           todayOffset += startOffset;
         } else if (todayOffset > -200000) {
           todayOffset = 0;
+          startOffset = -todayOffset;
+          prefs.edit().putString("startOffset", startOffset.toString()).commit();
         }
       }
       Database db = Database.getInstance(getActivity());
