@@ -169,16 +169,19 @@ public class SensorListener extends Service implements SensorEventListener {
 
   public static Notification getNotification(final Context context) {
     SharedPreferences prefs = context.getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+    long startDay = prefs.getLong("startDay", 0l);
     Integer startOffset = null;
     try {
       startOffset = Integer.valueOf(prefs.getString("startOffset", null));
     } catch(Throwable e) {}
     Database db = Database.getInstance(context);
     int today_offset = db.getSteps(Util.getToday());
-    if (startOffset != null && today_offset != Integer.MIN_VALUE) {
-    	today_offset += startOffset;
-    } else if (today_offset > -200000) {
-    	today_offset = 0;
+    if (startDay == Util.getToday()) {
+      if (startOffset != null && today_offset != Integer.MIN_VALUE) {
+        today_offset += startOffset;
+      } else if (today_offset > -200000) {
+        today_offset = 0;
+      }
     }
     if (steps == 0)
       steps = db.getCurrentSteps(); // use saved value if we haven't anything better
@@ -190,10 +193,12 @@ public class SensorListener extends Service implements SensorEventListener {
     if (steps > 0) {
       if (today_offset == Integer.MIN_VALUE) {
         today_offset = -steps;
-	    if (startOffset != null && today_offset != Integer.MIN_VALUE) {
-	   	  today_offset += startOffset;
-	    } else if (today_offset > -200000) {
-	      today_offset = 0;
+        if (startDay == Util.getToday()) {
+          if (startOffset != null && today_offset != Integer.MIN_VALUE) {
+             today_offset += startOffset;
+          } else if (today_offset > -200000) {
+            today_offset = 0;
+          }
         }
       }
       notificationBuilder.setProgress(goal, today_offset + steps, false).setContentText(

@@ -67,6 +67,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   private int status;
 
   private Integer startOffset;
+  private long startDay;
   private int todayOffset, total_start, goal, since_boot, total_days;
   public final static NumberFormat formatter = NumberFormat.getInstance(Locale.getDefault());
 
@@ -145,37 +146,37 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
    */
   @SuppressLint("BatteryLife")
   private void disableBatteryOptimizations() {
-	  try {
-	      Intent intent     = new Intent();
-	      String pkgName    = getActivity().getPackageName();
-	      PowerManager pm   = (PowerManager)getActivity().getSystemService(POWER_SERVICE);
-	
-	      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-	          this.fail(PedoListener.ERROR_BATTERY_OPTIMIZATION, "Permission not relevant on this device");
-	    	  return;
-	      }
-	
-	      if (pm.isIgnoringBatteryOptimizations(pkgName)) {
-	    	  win(true);
-	    	  return;
-	      }
-	
-	      intent.setAction(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-	      intent.setData(Uri.parse("package:" + pkgName));
-	
-	      cordova.startActivityForResult(this, intent, REQUEST_BATTERY_PERMS);
-	      answerLater();
-	  } catch(Exception e) {
+    try {
+        Intent intent     = new Intent();
+        String pkgName    = getActivity().getPackageName();
+        PowerManager pm   = (PowerManager)getActivity().getSystemService(POWER_SERVICE);
+  
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            this.fail(PedoListener.ERROR_BATTERY_OPTIMIZATION, "Permission not relevant on this device");
+          return;
+        }
+  
+        if (pm.isIgnoringBatteryOptimizations(pkgName)) {
+          win(true);
+          return;
+        }
+  
+        intent.setAction(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+        intent.setData(Uri.parse("package:" + pkgName));
+  
+        cordova.startActivityForResult(this, intent, REQUEST_BATTERY_PERMS);
+        answerLater();
+    } catch(Exception e) {
           this.fail(PedoListener.ERROR_BATTERY_OPTIMIZATION, e.getMessage());
-	  }
+    }
   }
   
   @Override
   public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-	  if (requestCode == REQUEST_BATTERY_PERMS) {
-		  win(resultCode == cordova.getActivity().RESULT_OK);
+    if (requestCode == REQUEST_BATTERY_PERMS) {
+      win(resultCode == cordova.getActivity().RESULT_OK);
           return;
-	  }
+    }
       // Handle other results if exists.
       super.onActivityResult(requestCode, resultCode, data);
   }
@@ -399,8 +400,10 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       }
     } catch (JSONException e) {}
     
+    startDay = Util.getToday();
+    prefs.edit().putLong("startDay", startDay).commit();
     try {
-    	startOffset = options.getInt("offset");
+      startOffset = options.getInt("offset");
         prefs.edit().putString("startOffset", startOffset.toString()).commit();
     } catch(JSONException e) {}
     
@@ -450,12 +453,13 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     Database db = Database.getInstance(getActivity());
 
     todayOffset = db.getSteps(Util.getToday());
-    if (startOffset != null && todayOffset != Integer.MIN_VALUE) {
-    	todayOffset += startOffset;
-    } else if (todayOffset > -200000) {
-    	todayOffset = 0;
+    if (startDay == Util.getToday()) {
+      if (startOffset != null && todayOffset != Integer.MIN_VALUE) {
+        todayOffset += startOffset;
+      } else if (todayOffset > -200000) {
+        todayOffset = 0;
+      }
     }
-	
     SharedPreferences prefs =
       getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
 
@@ -511,10 +515,12 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       // we don`t know when the reboot was, so set today`s steps to 0 by
       // initializing them with -STEPS_SINCE_BOOT
       todayOffset = -(int) event.values[0];
-      if (startOffset != null && todayOffset != Integer.MIN_VALUE) {
-      	todayOffset += startOffset;
-      } else if (todayOffset > -200000) {
-      	todayOffset = 0;
+      if (startDay == Util.getToday()) {
+        if (startOffset != null && todayOffset != Integer.MIN_VALUE) {
+          todayOffset += startOffset;
+        } else if (todayOffset > -200000) {
+          todayOffset = 0;
+        }
       }
       Database db = Database.getInstance(getActivity());
       db.insertNewDay(Util.getToday(), (int) event.values[0]);
@@ -550,9 +556,9 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     PluginResult r = new PluginResult(PluginResult.Status.OK, result);
     r.setKeepCallback(true);
     if (this.updateCallback != null) {
-    	this.updateCallback.sendPluginResult(r);
+      this.updateCallback.sendPluginResult(r);
     } else if (this.callbackContext != null) {
-    	this.callbackContext.sendPluginResult(r);    	
+      this.callbackContext.sendPluginResult(r);      
     }
   }
   
