@@ -66,8 +66,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
   private int status;
 
-  private Integer startOffset;
-  private long startDay;
   private int todayOffset, total_start, goal, since_boot, total_days;
   public final static NumberFormat formatter = NumberFormat.getInstance(Locale.getDefault());
 
@@ -119,6 +117,9 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     }
     else if (action.equals("stopStepperUpdates")) {
       stop();
+    }
+    else if (action.equals("destroy")) {
+      stopAndClear();
     }
     else if (action.equals("setNotificationLocalizedStrings")) {
       setNotificationLocalizedStrings(args);
@@ -248,9 +249,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     steps = db.getSteps(startdate, endate);
     if (startdate <= today && endate >= today) {
         steps += Math.max(db.getCurrentSteps(), since_boot);
-    }
-    if (startOffset != null && startdate <= startDay && endate >= startDay) {
-        steps += startOffset;
     }
     db.close();
     
@@ -403,13 +401,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       }
     } catch (JSONException e) {}
     
-    startDay = Util.getToday();
-    prefs.edit().putLong("startDay", startDay).commit();
-    try {
-      startOffset = options.getInt("offset");
-      prefs.edit().putString("startOffset", startOffset.toString()).commit();
-    } catch(JSONException e) {}
-    
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !cordova.hasPermission(Manifest.permission.ACTIVITY_RECOGNITION)) {
       cordova.requestPermission(this, REQUEST_DYN_PERMS, Manifest.permission.ACTIVITY_RECOGNITION);
       answerLater();
@@ -431,6 +422,17 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   }
 
   private void stop() {
+    if (status != PedoListener.STOPPED) {
+      uninitSensor();
+    }
+
+    getActivity().stopService(new Intent(getActivity(), SensorListener.class));
+    status = PedoListener.STOPPED;
+
+    win();
+  }
+
+  private void stopAndClear() {
     if (status != PedoListener.STOPPED) {
       uninitSensor();
     }
@@ -457,15 +459,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
     
     todayOffset = db.getSteps(Util.getToday());
-    if (startDay == Util.getToday()) {
-      if (startOffset != null && todayOffset != Integer.MIN_VALUE) {
-        todayOffset += startOffset;
-      } else if (todayOffset > -200000) {
-        todayOffset = 0;
-        startOffset = -todayOffset;
-        prefs.edit().putString("startOffset", startOffset.toString()).commit();
-      }
-    }
 
     goal = prefs.getInt(PedoListener.GOAL_PREF_INT, PedoListener.DEFAULT_GOAL);
     since_boot = db.getCurrentSteps();
@@ -519,16 +512,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       // we don`t know when the reboot was, so set today`s steps to 0 by
       // initializing them with -STEPS_SINCE_BOOT
       todayOffset = -(int) event.values[0];
-      if (startDay == Util.getToday()) {
-        if (startOffset != null && todayOffset != Integer.MIN_VALUE) {
-          todayOffset += startOffset;
-        } else if (todayOffset > -200000) {
-          todayOffset = 0;
-          startOffset = -todayOffset;
-          SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
-          prefs.edit().putString("startOffset", startOffset.toString()).commit();
-        }
-      }
       Database db = Database.getInstance(getActivity());
       db.insertNewDay(Util.getToday(), (int) event.values[0]);
       db.close();

@@ -64,14 +64,12 @@ stepper.disableBatteryOptimizations().then((result) => {
 });
 ```
 
-#### startStepperUpdates (offset, onSuccess, onError, options)
 #### startStepperUpdates (options, onSuccess, onError)
 Run with options and listener data updates. The success handler is called once during the first call and then called from the background thread whenever data is available.
 
 The method also creates a background service with notification (Android only).
 
 The `options` parameter may contain optional parameters. Below parameters recommended for notification localization (in Android platform):
-- offset - _int_ - the step count to starts with (Usually 0). Default to today's step count if available or 0 if not
 - goal - _int_ - the goal (default to no goal)
 - pedometerIsCountingText - _string_ - Set title text for notification
 - pedometerStepsToGoFormatText - _string_ - Set description format string with text for notification
@@ -80,16 +78,16 @@ The `options` parameter may contain optional parameters. Below parameters recomm
 
 Example:
 ```js
-var offset = 0, options = { 
-    pedometerIsCountingText: 'Pedometer is counting', 
-    pedometerStepsToGoFormatText: '%s steps to go', // available variables: [stepsToGo, todaySteps, goal]. Insert using %1$s, %2$s, %3$s placeholders
-    pedometerYourProgressFormatText: 'Your progress will be shown here soon', 
-    pedometerGoalReachedFormatText: '%s steps today', // available variables: [todaySteps, goal]. Insert using %1$s, %2$s placeholders
-  };
+const options = { 
+  pedometerIsCountingText: 'Pedometer is counting', 
+  pedometerStepsToGoFormatText: '%s steps to go', // available variables: [stepsToGo, todaySteps, goal]. Insert using %1$s, %2$s, %3$s placeholders
+  pedometerYourProgressFormatText: 'Your progress will be shown here soon', 
+  pedometerGoalReachedFormatText: '%s steps today', // available variables: [todaySteps, goal]. Insert using %1$s, %2$s placeholders
+};
   
-stepper.startStepperUpdates(offset, options).then((result) => {
-  var stepsToday = result.steps_today;
-}).catch((err) => {
+stepper.startStepperUpdates(options, (result) => {
+  console.log(result.steps_today);
+}, (err) => {
   console.error(err);
 });
 
@@ -125,6 +123,22 @@ Example:
 stepper.stopStepperUpdates()
   .then(() => {
     console.error("Stopped");
+  })
+  .catch((error) => {
+    console.error(err);
+  });
+```
+
+_Note: Background service can only be stopped by this method._
+
+#### destroy () => Promise 
+Android Only: Stop pedometer updates and clear database
+
+Example:
+```js
+stepper.destroy()
+  .then(() => {
+    console.error("Stopped and cleared");
   })
   .catch((error) => {
     console.error(err);

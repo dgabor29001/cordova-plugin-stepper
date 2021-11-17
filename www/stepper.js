@@ -17,9 +17,9 @@ Stepper.prototype.isStepCountingAvailable = function (onSuccess, onError) {
 // IOS & Android - Documented
 Stepper.prototype.requestPermission = function (onSuccess, onError) {
     let promise = new Promise(function(resolve, reject) {
-		if(!/^android|amazon/i.test(device.platform)) {
-		  return resolve(true);
-	    }
+        if(!/^android|amazon/i.test(device.platform)) {
+          return resolve(true);
+        }
         exec(resolve, reject, "Stepper", "requestPermission", []);
     });
     if (onSuccess) promise = promise.then(onSuccess);
@@ -30,9 +30,9 @@ Stepper.prototype.requestPermission = function (onSuccess, onError) {
 // IOS & Android - Documented
 Stepper.prototype.disableBatteryOptimizations = function (onSuccess, onError) {
     let promise = new Promise(function(resolve) {
-		if(!/^android|amazon/i.test(device.platform)) {
-		  return resolve(false);
-	    }
+        if(!/^android|amazon/i.test(device.platform)) {
+          return resolve(false);
+        }
         exec(resolve, () => resolve(false), "Stepper", "disableBatteryOptimizations", []);
     });
     if (onSuccess) promise = promise.then(onSuccess);
@@ -41,20 +41,31 @@ Stepper.prototype.disableBatteryOptimizations = function (onSuccess, onError) {
 };
 
 // IOS & Android - Documented
-Stepper.prototype.startStepperUpdates = function (offset, onSuccess, onError, options) {
-	let opts = options || {};
-	if (typeof(offset) === "object") {
-		opts = offset;
-	} else if (typeof(opts.offset) === "undefined" && typeof(offset) !== "undefined") {
-	    opts.offset = offset;
-	}
-	exec(onSuccess, onError, "Stepper", "startStepperUpdates", [opts]);
+Stepper.prototype.startStepperUpdates = function(options, onSuccess, onError, extra) {
+    let opts = extra || {};
+    if (typeof(options) === "object") {
+        opts = options;
+    }
+    exec(onSuccess, onError, "Stepper", "startStepperUpdates", [opts]);
 };
 
 // IOS & Android - Documented
 Stepper.prototype.stopStepperUpdates = function (onSuccess, onError) {
     let promise = new Promise(function(resolve, reject) {
         exec(resolve, reject, "Stepper", "stopStepperUpdates", []);
+    });
+    if (onSuccess) promise = promise.then(onSuccess);
+    if (onError) promise = promise.catch(onError);
+    return promise;
+};
+
+// IOS & Android - Documented
+Stepper.prototype.destroy = function (onSuccess, onError) {
+    if(!/^android|amazon/i.test(device.platform)) {
+      return resolve(false);
+    }
+    let promise = new Promise(function(resolve, reject) {
+        exec(resolve, reject, "Stepper", "destroy", []);
     });
     if (onSuccess) promise = promise.then(onSuccess);
     if (onError) promise = promise.catch(onError);
@@ -98,10 +109,10 @@ Stepper.prototype.getSteps = function (date, onSuccess, onError) {
 
 // IOS & Android - Documented
 Stepper.prototype.getStepsByPeriod = function (start, end, onSuccess, onError) {
-	const startDate = new Date(start || 0);
-	startDate.setHours(0, 0, 0, 0);
-	const endDate = new Date(end || new Date());
-	endDate.setHours(23, 59, 59, 999);
+    const startDate = new Date(start || 0);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(end || new Date());
+    endDate.setHours(23, 59, 59, 999);
     let promise = new Promise(function(resolve, reject) {
         exec(resolve, reject, "Stepper", "getStepsByPeriod", [startDate.toISOString(), endDate.toISOString()]);
     });
