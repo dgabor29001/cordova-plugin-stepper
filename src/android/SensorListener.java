@@ -112,9 +112,7 @@ public class SensorListener extends Service implements SensorEventListener {
   public int onStartCommand(final Intent intent, int flags, int startId) {
     reRegisterSensor();
     registerBroadcastReceiver();
-    if (!updateIfNecessary()) {
-      showNotification();
-    }
+    updateIfNecessary();
 
     // restart service every hour to save the current step count
     long nextUpdate = Math.min(Util.getTomorrow(),
