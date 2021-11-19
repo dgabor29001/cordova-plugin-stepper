@@ -220,11 +220,6 @@ public class SensorListener extends Service implements SensorEventListener {
   }
 
   private void registerBroadcastReceiver() {
-    try {
-      unregisterReceiver(shutdownReceiver);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
     IntentFilter filter = new IntentFilter();
     filter.addAction(Intent.ACTION_SHUTDOWN);
     registerReceiver(shutdownReceiver, filter);
