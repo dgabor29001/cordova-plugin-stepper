@@ -244,7 +244,7 @@ public class Database extends SQLiteOpenHelper {
      */
     public List<Pair<Long, Integer>> getLastEntries(int num) {
         Cursor c = getReadableDatabase()
-                .query(DB_NAME, new String[]{"date", "steps"}, "date > 0", null, null, null,
+                .query(DB_NAME, new String[]{"date", "steps"}, null, null, null, null,
                         "date DESC", String.valueOf(num));
         int max = c.getCount();
         List<Pair<Long, Integer>> result = new ArrayList<>(max);
