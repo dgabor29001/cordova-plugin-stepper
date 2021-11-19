@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
+import android.content.SharedPreferences;
 
 import org.apache.cordova.BuildConfig;
 import org.apache.cordova.stepper.util.Util;
