@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.util.Log;
 
 import org.apache.cordova.BuildConfig;
 import org.apache.cordova.stepper.util.API26Wrapper;
@@ -13,6 +14,7 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
+      Log.i("STEPPER", "BootReceiver.onReceive");
       if (intent != null) {
         if (intent.getAction().equalsIgnoreCase(
           Intent.ACTION_BOOT_COMPLETED)) {

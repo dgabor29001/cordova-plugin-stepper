@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Log;
 
 import org.apache.cordova.BuildConfig;
 import org.apache.cordova.stepper.util.Util;
@@ -13,7 +14,7 @@ public class ShutdownRecevier extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-
+        Log.i("STEPPER", "ShutdownRecevier.onReceive");
         if (Build.VERSION.SDK_INT >= 26) {
             API26Wrapper.startForegroundService(context, new Intent(context, SensorListener.class));
         } else {

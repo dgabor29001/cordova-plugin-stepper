@@ -309,7 +309,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
    * Stop listener.
    */
   public void onDestroy() {
-    Log.i("TAG", "onDestroy");
+    Log.i("STEPPER", "onDestroy");
   }
 
   /**
@@ -317,7 +317,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
    */
   @Override
   public void onReset() {
-    Log.i("TAG", "onReset");
+    Log.i("STEPPER", "onReset");
   }
 
   private void requestPermission() {
@@ -356,7 +356,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
         }
       }
       // all dynamic permissions accepted!
-      Log.i("TAG", "Dynamic permissions accepted");
+      Log.i("STEPPER", "Dynamic permissions accepted");
       if (requestCode == REQUEST_MAN_PERMS) {
         win(true);
       } else {

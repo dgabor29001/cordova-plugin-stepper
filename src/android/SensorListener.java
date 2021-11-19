@@ -111,7 +111,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
   @Override
   public int onStartCommand(final Intent intent, int flags, int startId) {
-	Log.i("TAG", "SensorListener.onStartCommand");
+	Log.i("STEPPER", "SensorListener.onStartCommand");
     reRegisterSensor();
     registerBroadcastReceiver();
     updateIfNecessary();
@@ -135,7 +135,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
   @Override
   public void onCreate() {
-	Log.i("TAG", "SensorListener.onCreate");
+	Log.i("STEPPER", "SensorListener.onCreate");
     super.onCreate();
   }
 
@@ -150,7 +150,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
   @Override
   public void onTaskRemoved(final Intent rootIntent) {
-	Log.i("TAG", "SensorListener.onTaskRemoved");
+	Log.i("STEPPER", "SensorListener.onTaskRemoved");
     super.onTaskRemoved(rootIntent);
     // Restart service in 500 ms
     ((AlarmManager) getSystemService(Context.ALARM_SERVICE))
@@ -160,7 +160,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
   @Override
   public void onDestroy() {
-	Log.i("TAG", "SensorListener.onDestroy");
+	Log.i("STEPPER", "SensorListener.onDestroy");
     super.onDestroy();
     try {
       SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
