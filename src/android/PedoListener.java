@@ -448,8 +448,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
   private void initSensor() {
     // If already starting or running, then return
-    if ((status == PedoListener.RUNNING) || (status == PedoListener.STARTING)
-      && status != PedoListener.PAUSED) {
+    if (status == PedoListener.RUNNING || status == PedoListener.STARTING) {
       updateUI();
       return;
     }
