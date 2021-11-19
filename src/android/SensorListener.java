@@ -239,6 +239,6 @@ public class SensorListener extends Service implements SensorEventListener {
 
     // enable batching with delay of max 2 min
     sm.registerListener(this, sm.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
-      SensorManager.SENSOR_DELAY_UI, (int) (2 * MICROSECONDS_IN_ONE_MINUTE));
+      SensorManager.SENSOR_DELAY_GAME, (int) (2 * MICROSECONDS_IN_ONE_MINUTE));
   }
 }

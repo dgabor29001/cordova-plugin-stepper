@@ -471,7 +471,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       this.fail(PedoListener.ERROR_NO_SENSOR_FOUND, "Not Step counter sensor found");
       return;
     } else {
-      sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST, 0);
+      sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME, 0);
     }
 
     since_boot -= pauseDifference;
