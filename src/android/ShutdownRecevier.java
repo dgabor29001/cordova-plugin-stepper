@@ -10,12 +10,12 @@ import org.apache.cordova.BuildConfig;
 import org.apache.cordova.stepper.util.Util;
 import org.apache.cordova.stepper.util.API26Wrapper;
 
-public class ShutdownRecevier extends BroadcastReceiver {
+public class ShutdownReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        Log.i("STEPPER", "ShutdownRecevier.onReceive");
-        SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+        Log.i("STEPPER", "ShutdownReceiver.onReceive");
+        SharedPreferences prefs = context.getSharedPreferences("pedometer", Context.MODE_PRIVATE);
         if (prefs.getBoolean("enabled", false) == false) {
           return;
         }
@@ -24,8 +24,7 @@ public class ShutdownRecevier extends BroadcastReceiver {
         // broadcast might not be send. Therefore, the app will check this
         // setting on the next boot and displays an error message if it's not
         // set to true
-        context.getSharedPreferences("pedometer", Context.MODE_PRIVATE).edit()
-                .putBoolean("correctShutdown", true).commit();
+        prefs.edit().putBoolean("correctShutdown", true).commit();
 
         Database db = Database.getInstance(context);
         // if it's already a new day, add the temp. steps to the last one

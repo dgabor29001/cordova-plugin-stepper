@@ -13,15 +13,13 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-      SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+      SharedPreferences prefs = context.getSharedPreferences("pedometer", Context.MODE_PRIVATE);
       if (!prefs.getBoolean("enabled", false)) {
         return;
       }
       if (intent != null) {
         if (intent.getAction().equalsIgnoreCase(
           Intent.ACTION_BOOT_COMPLETED)) {
-
-          SharedPreferences prefs = context.getSharedPreferences("pedometer", Context.MODE_PRIVATE);
 
           Database db = Database.getInstance(context);
 

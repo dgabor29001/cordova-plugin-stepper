@@ -47,7 +47,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
   private static int notificationIconId = 0;
 
-  private final BroadcastReceiver shutdownReceiver = new ShutdownRecevier();
+  private final BroadcastReceiver shutdownReceiver = new ShutdownReceiver();
 
   @Override
   public void onAccuracyChanged(final Sensor sensor, int accuracy) {
