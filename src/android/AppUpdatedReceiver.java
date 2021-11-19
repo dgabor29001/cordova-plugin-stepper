@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
+import android.content.SharedPreferences;
 
 import org.apache.cordova.BuildConfig;
 import org.apache.cordova.stepper.util.API26Wrapper;
@@ -13,10 +14,15 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
+        Log.i("STEPPER", "AppUpdatedReceiver.onReceive");
+        SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+        if (!prefs.getBoolean("enabled", false)) {
+          return;
+        }
         if (Build.VERSION.SDK_INT >= 26) {
-            API26Wrapper.startForegroundService(context, new Intent(context, SensorListener.class));
+          API26Wrapper.startForegroundService(context, new Intent(context, SensorListener.class));
         } else {
-            context.startService(new Intent(context, SensorListener.class));
+          context.startService(new Intent(context, SensorListener.class));
         }
     }
 

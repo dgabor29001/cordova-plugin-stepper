@@ -235,7 +235,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     long startdate = 0;
     long endate = 0;
     long today = Util.getToday();
-    int steps = 0;
     try {
       startdate = OffsetDateTime.parse(args.getString(0)).toEpochSecond() * 1000;
       endate = OffsetDateTime.parse(args.getString(1)).toEpochSecond() * 1000;
@@ -246,7 +245,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     }
 
     Database db = Database.getInstance(getActivity());
-    steps = db.getSteps(startdate, endate);
+    int steps = db.getSteps(startdate, endate);
     if (startdate <= today && endate >= today) {
         steps += Math.max(db.getCurrentSteps(), since_boot);
     }

@@ -15,10 +15,9 @@ public class ShutdownRecevier extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
         Log.i("STEPPER", "ShutdownRecevier.onReceive");
-        if (Build.VERSION.SDK_INT >= 26) {
-            API26Wrapper.startForegroundService(context, new Intent(context, SensorListener.class));
-        } else {
-            context.startService(new Intent(context, SensorListener.class));
+        SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+        if (prefs.getBoolean("enabled", false) == false) {
+          return;
         }
 
         // if the user used a root script for shutdown, the DEVICE_SHUTDOWN
