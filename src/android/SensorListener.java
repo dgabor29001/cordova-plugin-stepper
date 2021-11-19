@@ -17,6 +17,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.IBinder;
+import android.util.Log;
 
 import org.apache.cordova.BuildConfig;
 import org.apache.cordova.stepper.util.API23Wrapper;
@@ -110,6 +111,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
   @Override
   public int onStartCommand(final Intent intent, int flags, int startId) {
+	Log.i("TAG", "SensorListener.onStartCommand");
     reRegisterSensor();
     registerBroadcastReceiver();
     updateIfNecessary();
@@ -133,6 +135,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
   @Override
   public void onCreate() {
+	Log.i("TAG", "SensorListener.onCreate");
     super.onCreate();
   }
 
@@ -147,6 +150,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
   @Override
   public void onTaskRemoved(final Intent rootIntent) {
+	Log.i("TAG", "SensorListener.onTaskRemoved");
     super.onTaskRemoved(rootIntent);
     // Restart service in 500 ms
     ((AlarmManager) getSystemService(Context.ALARM_SERVICE))
@@ -156,6 +160,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
   @Override
   public void onDestroy() {
+	Log.i("TAG", "SensorListener.onDestroy");
     super.onDestroy();
     try {
       SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
