@@ -56,7 +56,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
   @Override
   public void onSensorChanged(final SensorEvent event) {
-    if (event.values[0] > Integer.MAX_VALUE) {
+	if (event.values[0] > Integer.MAX_VALUE || event.values[0] < 0) {
       return;
     } else {
       steps = (int) event.values[0];

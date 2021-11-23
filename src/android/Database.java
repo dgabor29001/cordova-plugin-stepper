@@ -131,6 +131,16 @@ public class Database extends SQLiteOpenHelper {
     }
 
     /**
+     * Adds the given number of steps to the last entry in the database
+     *
+     * @param steps the number of steps to add
+     */
+    public void updateSteps(long date, int steps) {
+        getWritableDatabase().execSQL("UPDATE " + DB_NAME + " SET steps = " + steps +
+                " WHERE date = " + date);
+    }
+
+    /**
      * Inserts a new entry in the database, overwriting any existing entry for the given date.
      * Use this method for restoring data from a backup.
      *
