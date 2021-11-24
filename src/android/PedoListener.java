@@ -366,17 +366,17 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   
   private void start(JSONArray args) throws JSONException {
     final JSONObject options = args.getJSONObject(0);
+    
+    SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
 
     // If already starting or running, then return
     if ((status == PedoListener.RUNNING) || (status == PedoListener.STARTING)) {
+      prefs.edit().putBoolean("enabled", true).commit();
       updateUI();
       return;
     }
 
     // Set options
-    SharedPreferences prefs =
-      getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
-
     if (options.has(PEDOMETER_GOAL_REACHED_FORMAT_TEXT)) {
       prefs.edit().putString(PEDOMETER_GOAL_REACHED_FORMAT_TEXT, options.getString(PEDOMETER_GOAL_REACHED_FORMAT_TEXT)).commit();
     }
@@ -410,17 +410,22 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   }
   
   private void start() {
+	SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+    prefs.edit().putBoolean("enabled", true).commit();
     if (Build.VERSION.SDK_INT >= 26) {
-        API26Wrapper.startForegroundService(getActivity(),
-          new Intent(getActivity(), SensorListener.class));
-      } else {
-        getActivity().startService(new Intent(getActivity(), SensorListener.class));
-      }
+      API26Wrapper.startForegroundService(getActivity(),
+        new Intent(getActivity(), SensorListener.class));
+    } else {
+      getActivity().startService(new Intent(getActivity(), SensorListener.class));
+    }
 
-      initSensor();
+    initSensor();
   }
 
   private void stop() {
+	SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+    prefs.edit().putBoolean("enabled", false).commit();
+    
     if (status != PedoListener.STOPPED) {
       uninitSensor();
     }
@@ -432,6 +437,9 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   }
 
   private void stopAndClear() {
+	SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+    prefs.edit().putBoolean("enabled", false).commit();
+
     if (status != PedoListener.STOPPED) {
       uninitSensor();
     }
@@ -447,14 +455,15 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   }
 
   private void initSensor() {
+	SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
     // If already starting or running, then return
     if (status == PedoListener.RUNNING || status == PedoListener.STARTING) {
+      prefs.edit().putBoolean("enabled", true).commit();
       updateUI();
       return;
     }
 
     Database db = Database.getInstance(getActivity());
-    SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
     
     todayOffset = db.getSteps(Util.getToday());
 
@@ -466,6 +475,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
     sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
     if (sensor == null) {
+      prefs.edit().putBoolean("enabled", false).commit();
       this.fail(PedoListener.ERROR_NO_SENSOR_FOUND, "Not Step counter sensor found");
       return;
     } else {
