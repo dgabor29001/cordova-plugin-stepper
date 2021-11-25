@@ -526,10 +526,10 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       db.close();
     } else if (todayOffset + since_boot < 0) {
       // offset is wrong. Recalculate it
-       todayOffset = -since_boot;
-       Database db = Database.getInstance(getActivity());
-       db.updateSteps(Util.getToday(), -since_boot);
-       db.close();
+//       todayOffset = -since_boot;
+//       Database db = Database.getInstance(getActivity());
+//       db.updateSteps(Util.getToday(), -since_boot);
+//       db.close();
     }
 
     updateUI();
