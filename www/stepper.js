@@ -50,9 +50,13 @@ Stepper.prototype.startStepperUpdates = function(options, onSuccess, onError, ex
 };
 
 // IOS & Android - Documented
-Stepper.prototype.stopStepperUpdates = function (onSuccess, onError) {
+Stepper.prototype.stopStepperUpdates = function (clearDatabase, onSuccess, onError) {
+	if (typeof(clearDatabase) !== "boolean") {
+		onError = onSuccess;
+		onSuccess = clearDatabase;
+	}
     let promise = new Promise(function(resolve, reject) {
-        exec(resolve, reject, "Stepper", "stopStepperUpdates", []);
+        exec(resolve, reject, "Stepper", "stopStepperUpdates", [!!clearDatabase]);
     });
     if (onSuccess) promise = promise.then(onSuccess);
     if (onError) promise = promise.catch(onError);
@@ -61,15 +65,7 @@ Stepper.prototype.stopStepperUpdates = function (onSuccess, onError) {
 
 // IOS & Android - Documented
 Stepper.prototype.destroy = function (onSuccess, onError) {
-    if(!/^android|amazon/i.test(device.platform)) {
-      return resolve(false);
-    }
-    let promise = new Promise(function(resolve, reject) {
-        exec(resolve, reject, "Stepper", "destroy", []);
-    });
-    if (onSuccess) promise = promise.then(onSuccess);
-    if (onError) promise = promise.catch(onError);
-    return promise;
+    return this.stopStepperUpdates(true, onSuccess, onError);
 };
 
 // Android - Not Available - UnDocumented

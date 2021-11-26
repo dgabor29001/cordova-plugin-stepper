@@ -116,10 +116,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
       start(args);
     }
     else if (action.equals("stopStepperUpdates")) {
-      stop();
-    }
-    else if (action.equals("destroy")) {
-      stopAndClear();
+      stop(args);
     }
     else if (action.equals("setNotificationLocalizedStrings")) {
       setNotificationLocalizedStrings(args);
@@ -422,31 +419,26 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     initSensor();
   }
 
-  private void stop() {
+  private void stop(JSONArray args) {
+	boolean clearDatabase = false;
+	try {
+	  clearDatabase = args.getBoolean(0);
+	} catch (JSONException e) {
+	  return;
+	}
+
 	SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
     prefs.edit().putBoolean("enabled", false).commit();
     
     if (status != PedoListener.STOPPED) {
       uninitSensor();
     }
-
-    getActivity().stopService(new Intent(getActivity(), SensorListener.class));
-    status = PedoListener.STOPPED;
-
-    win();
-  }
-
-  private void stopAndClear() {
-	SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
-    prefs.edit().putBoolean("enabled", false).commit();
-
-    if (status != PedoListener.STOPPED) {
-      uninitSensor();
+    
+    if (clearDatabase) {
+      Database db = Database.getInstance(getActivity());
+      db.clear();
+      db.close();
     }
-
-    Database db = Database.getInstance(getActivity());
-    db.clear();
-    db.close();
 
     getActivity().stopService(new Intent(getActivity(), SensorListener.class));
     status = PedoListener.STOPPED;
