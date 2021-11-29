@@ -54,9 +54,10 @@ Stepper.prototype.stopStepperUpdates = function (clearDatabase, onSuccess, onErr
 	if (typeof(clearDatabase) !== "boolean") {
 		onError = onSuccess;
 		onSuccess = clearDatabase;
+		clearDatabase = false;
 	}
     let promise = new Promise(function(resolve, reject) {
-        exec(resolve, reject, "Stepper", "stopStepperUpdates", [!!clearDatabase]);
+        exec(resolve, reject, "Stepper", "stopStepperUpdates", [clearDatabase]);
     });
     if (onSuccess) promise = promise.then(onSuccess);
     if (onError) promise = promise.catch(onError);
