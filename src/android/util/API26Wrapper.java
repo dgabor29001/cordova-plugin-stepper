@@ -25,8 +25,8 @@ public class API26Wrapper {
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationChannel channel =
                 new NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_ID,
-                        NotificationManager.IMPORTANCE_LOW);
-        channel.setImportance(NotificationManager.IMPORTANCE_LOW); // ignored by Android O ...
+                        NotificationManager.IMPORTANCE_NONE);
+        channel.setImportance(NotificationManager.IMPORTANCE_MIN); // ignored by Android O ...
         channel.enableLights(false);
         channel.enableVibration(false);
         channel.setBypassDnd(false);
