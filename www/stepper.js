@@ -46,7 +46,16 @@ Stepper.prototype.startStepperUpdates = function(options, onSuccess, onError, ex
     if (typeof(options) === "object") {
         opts = options;
     }
-    exec(onSuccess, onError, "Stepper", "startStepperUpdates", [opts]);
+    exec((result) => {
+    	if (result && result.startDate && result.startDate < new Date().setHours(0,0,0,0)) {
+    		this.stopStepperUpdates(
+    			false,
+        	    this.startStepperUpdates.bind(this, options, onSuccess, onError, extra),
+        	    this.startStepperUpdates.bind(this, options, onSuccess, onError, extra)
+            );
+    	}
+        return onSuccess(result);
+    }, onError, "Stepper", "startStepperUpdates", [opts]);
 };
 
 // IOS & Android - Documented
