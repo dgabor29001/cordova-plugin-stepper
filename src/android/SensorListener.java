@@ -72,15 +72,7 @@ public class SensorListener extends Service implements SensorEventListener {
       (steps > 0 && System.currentTimeMillis() > lastSaveTime + SAVE_OFFSET_TIME)) {
       Database db = Database.getInstance(this);
       if (db.getSteps(Util.getToday()) == Integer.MIN_VALUE) {
-        int pauseDifference = steps -
-          getSharedPreferences("pedometer", Context.MODE_PRIVATE)
-            .getInt("pauseCount", steps);
-        db.insertNewDay(Util.getToday(), steps - pauseDifference);
-        if (pauseDifference > 0) {
-          // update pauseCount for the new day
-          getSharedPreferences("pedometer", Context.MODE_PRIVATE).edit()
-            .putInt("pauseCount", steps).commit();
-        }
+        db.insertNewDay(Util.getToday(), steps);
       }
       db.saveCurrentSteps(steps);
       db.close();
