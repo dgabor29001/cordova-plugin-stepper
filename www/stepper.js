@@ -53,6 +53,7 @@ Stepper.prototype.startStepperUpdates = function(options, onSuccess, onError, ex
         	    this.startStepperUpdates.bind(this, options, onSuccess, onError, extra),
         	    this.startStepperUpdates.bind(this, options, onSuccess, onError, extra)
             );
+    		return;
     	}
         return onSuccess(result);
     }, onError, "Stepper", "startStepperUpdates", [opts]);
