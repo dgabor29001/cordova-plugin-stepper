@@ -251,6 +251,8 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     JSONObject joresult = new JSONObject();
     try {
         joresult.put("steps", steps);
+        joresult.put("current_steps", db.getCurrentSteps());
+        joresult.put("since_boot", since_boot);
     }
     catch (JSONException e) {
       e.printStackTrace();
