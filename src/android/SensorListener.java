@@ -108,9 +108,9 @@ public class SensorListener extends Service implements SensorEventListener {
     registerBroadcastReceiver();
     updateIfNecessary();
 
-    // restart service every hour to save the current step count
+    // restart service every fifteen minutes to save the current step count
     long nextUpdate = Math.min(Util.getTomorrow(),
-      System.currentTimeMillis() + AlarmManager.INTERVAL_HOUR);
+      System.currentTimeMillis() + AlarmManager.INTERVAL_FIFTEEN_MINUTES);
     AlarmManager am =
       (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
     PendingIntent pi = PendingIntent
