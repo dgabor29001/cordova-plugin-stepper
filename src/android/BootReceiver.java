@@ -14,6 +14,7 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
       SharedPreferences prefs = context.getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+      Log.i("STEPPER", "BootReceiver.onReceive enabled:"+prefs.getBoolean("enabled", false));
       if (!prefs.getBoolean("enabled", false)) {
         return;
       }

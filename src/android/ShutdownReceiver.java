@@ -15,8 +15,8 @@ public class ShutdownReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        Log.i("STEPPER", "ShutdownReceiver.onReceive");
         SharedPreferences prefs = context.getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+        Log.i("STEPPER", "ShutdownReceiver.onReceive enabled:"+prefs.getBoolean("enabled", false));
 
         // if the user used a root script for shutdown, the DEVICE_SHUTDOWN
         // broadcast might not be send. Therefore, the app will check this
