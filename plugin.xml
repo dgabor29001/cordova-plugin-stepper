@@ -2,7 +2,7 @@
 <plugin id="@felicienfrancois/cordova-plugin-stepper"
     xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    version="0.2.58">
+    version="0.2.59">
     <name>Stepper</name>
     <author>Felicien Francois</author>
     <description>Lightweight pedometer Cordova/Phonegap plugin for Android using the hardware step sensor, with notifications.</description>
@@ -44,7 +44,7 @@
                     <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
                 </intent-filter>
             </receiver>
-            <service android:name="org.apache.cordova.stepper.SensorListener"/>
+            <service android:name="org.apache.cordova.stepper.SensorListener" android:exported="true" />
         </config-file>
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <uses-permission android:name="android.permission.INTERNET" />
