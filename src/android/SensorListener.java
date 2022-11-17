@@ -115,7 +115,7 @@ public class SensorListener extends Service implements SensorEventListener {
       (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
     PendingIntent pi = PendingIntent
       .getService(getApplicationContext(), 2, new Intent(this, SensorListener.class),
-        PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     if (Build.VERSION.SDK_INT >= 23) {
       API23Wrapper.setAlarmWhileIdle(am, AlarmManager.RTC, nextUpdate, pi);
     } else {
@@ -147,7 +147,7 @@ public class SensorListener extends Service implements SensorEventListener {
     // Restart service in 500 ms
     ((AlarmManager) getSystemService(Context.ALARM_SERVICE))
       .set(AlarmManager.RTC, System.currentTimeMillis() + 500, PendingIntent
-        .getService(this, 3, new Intent(this, SensorListener.class), 0));
+        .getService(this, 3, new Intent(this, SensorListener.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
   }
 
   @Override
@@ -198,7 +198,7 @@ public class SensorListener extends Service implements SensorEventListener {
     Intent launchIntent = packageManager.getLaunchIntentForPackage(context.getPackageName());
 
     PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-      launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+      launchIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
     if (notificationIconId == 0) {
       notificationIconId = getNotificationIconId(context);
