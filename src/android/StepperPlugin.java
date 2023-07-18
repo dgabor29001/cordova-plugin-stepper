@@ -344,22 +344,18 @@ public class StepperPlugin extends CordovaPlugin implements SensorEventListener 
     if (options.has(Config.AGGREGATE_TICKS_INTERVAL)) {
         prefs.edit().putInt(Config.AGGREGATE_TICKS_INTERVAL, options.getInt(Config.AGGREGATE_TICKS_INTERVAL)).commit();
     }
-    
-    public static String TIMEZONE = "timeZone";
-    public static String AGGREGATE_TICKS_INTERVAL = "aggregateTicksInterval";
-
 
     // Set options
     if (options.has(Config.PEDOMETER_GOAL_REACHED_FORMAT_TEXT)) {
-      prefs.edit().putString(Config.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, options.getString(PEDOMETER_GOAL_REACHED_FORMAT_TEXT)).commit();
+      prefs.edit().putString(Config.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, options.getString(Config.PEDOMETER_GOAL_REACHED_FORMAT_TEXT)).commit();
     }
 
     if (options.has(Config.PEDOMETER_IS_COUNTING_TEXT)) {
       prefs.edit().putString(Config.PEDOMETER_IS_COUNTING_TEXT, options.getString(Config.PEDOMETER_IS_COUNTING_TEXT)).commit();
     }
 
-    if (options.has(PEDOMETER_STEPS_TO_GO_FORMAT_TEXT)) {
-      prefs.edit().putString(PEDOMETER_STEPS_TO_GO_FORMAT_TEXT, options.getString(Config.PEDOMETER_STEPS_TO_GO_FORMAT_TEXT)).commit();
+    if (options.has(Config.PEDOMETER_STEPS_TO_GO_FORMAT_TEXT)) {
+      prefs.edit().putString(Config.PEDOMETER_STEPS_TO_GO_FORMAT_TEXT, options.getString(Config.PEDOMETER_STEPS_TO_GO_FORMAT_TEXT)).commit();
     }
 
     if (options.has(Config.PEDOMETER_YOUR_PROGRESS_FORMAT_TEXT)) {
