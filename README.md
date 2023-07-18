@@ -184,7 +184,7 @@ stepper.getSteps(startOfDay)
 ```
 
 #### getStepsByPeriod (start, end) => Promise
-Gets the number of steps for the specified period. `start` and `end` parameters must be start of day and number of milliseconds since the Unix Epoch.
+Gets the number of steps for the specified period.
 
 Example:
 ```js
