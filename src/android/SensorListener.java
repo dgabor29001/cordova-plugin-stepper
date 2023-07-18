@@ -23,6 +23,7 @@ import org.apache.cordova.BuildConfig;
 import org.apache.cordova.stepper.util.API23Wrapper;
 import org.apache.cordova.stepper.util.API26Wrapper;
 import org.apache.cordova.stepper.util.Util;
+import org.apache.cordova.stepper.util.Config;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -170,7 +171,7 @@ public class SensorListener extends Service implements SensorEventListener {
     if (steps == 0)
       steps = db.getCurrentSteps(); // use saved value if we haven't anything better
     db.close();
-    int goal = prefs.getInt(PedoListener.GOAL_PREF_INT, PedoListener.DEFAULT_GOAL);
+    int goal = prefs.getInt(Config.GOAL_PREF_INT, Config.DEFAULT_GOAL);
     Notification.Builder notificationBuilder =
       Build.VERSION.SDK_INT >= 26 ? API26Wrapper.getNotificationBuilder(context) :
         new Notification.Builder(context);
@@ -178,12 +179,12 @@ public class SensorListener extends Service implements SensorEventListener {
       if (today_offset == Integer.MIN_VALUE) today_offset = -steps;
       notificationBuilder.setProgress(goal, today_offset + steps, false).setContentText(
         today_offset + steps >= Math.max(goal,1) ?
-          String.format(prefs.getString(PedoListener.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, "%s steps today"),
+          String.format(prefs.getString(Config.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, "%s steps today"),
             NumberFormat.getInstance(Locale.getDefault())
               .format(today_offset + steps),
             NumberFormat.getInstance(Locale.getDefault())
               .format(goal)) :
-          String.format(prefs.getString(PedoListener.PEDOMETER_STEPS_TO_GO_FORMAT_TEXT, "%s steps to go"),
+          String.format(prefs.getString(Config.PEDOMETER_STEPS_TO_GO_FORMAT_TEXT, "%s steps to go"),
             NumberFormat.getInstance(Locale.getDefault())
               .format(goal - today_offset - steps),
             NumberFormat.getInstance(Locale.getDefault())
@@ -191,7 +192,7 @@ public class SensorListener extends Service implements SensorEventListener {
             NumberFormat.getInstance(Locale.getDefault())
               .format(goal)));
     } else { // still no step value?
-      notificationBuilder.setContentText(prefs.getString(PedoListener.PEDOMETER_YOUR_PROGRESS_FORMAT_TEXT, "Your progress will be shown here soon"));
+      notificationBuilder.setContentText(prefs.getString(Config.PEDOMETER_YOUR_PROGRESS_FORMAT_TEXT, "Your progress will be shown here soon"));
     }
 
     PackageManager packageManager = context.getPackageManager();
@@ -205,7 +206,7 @@ public class SensorListener extends Service implements SensorEventListener {
     }
 
     notificationBuilder.setPriority(Notification.PRIORITY_DEFAULT).setShowWhen(false)
-      .setContentTitle(prefs.getString(PedoListener.PEDOMETER_IS_COUNTING_TEXT, "Pedometer is counting"))
+      .setContentTitle(prefs.getString(Config.PEDOMETER_IS_COUNTING_TEXT, "Pedometer is counting"))
       .setContentIntent(contentIntent).setSmallIcon(notificationIconId)
       .setOngoing(true);
     return notificationBuilder.build();

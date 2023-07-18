@@ -29,6 +29,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.PowerManager;
 import org.apache.cordova.stepper.util.API26Wrapper;
+import org.apache.cordova.stepper.util.Config;
+import org.apache.cordova.stepper.util.Status;
 
 import android.os.Build;
 import android.util.Log;
@@ -40,29 +42,11 @@ import static android.content.Context.POWER_SERVICE;
 /**
  * This class listens to the pedometer sensor
  */
-public class PedoListener extends CordovaPlugin implements SensorEventListener {
+public class StepperPlugin extends CordovaPlugin implements SensorEventListener {
 
   public static int REQUEST_DYN_PERMS = 101;
   public static int REQUEST_MAN_PERMS = 102;
   public static int REQUEST_BATTERY_PERMS = 103;
-
-  public static int STOPPED = 0;
-  public static int STARTING = 1;
-  public static int RUNNING = 2;
-  public static int ERROR_FAILED_TO_START = 3;
-  public static int ERROR_NO_SENSOR_FOUND = 4;
-  public static int ERROR_NO_PERMISSION = 3;
-  public static int ERROR_BATTERY_OPTIMIZATION = 6;
-  public static int PAUSED = 5;
-
-  public static int DEFAULT_GOAL = 0;
-
-  public static String GOAL_PREF_INT = "GoalPrefInt";
-
-  public static String PEDOMETER_IS_COUNTING_TEXT = "pedometerIsCountingText";
-  public static String PEDOMETER_STEPS_TO_GO_FORMAT_TEXT = "pedometerStepsToGoFormatText";
-  public static String PEDOMETER_YOUR_PROGRESS_FORMAT_TEXT = "pedometerYourProgressFormatText";
-  public static String PEDOMETER_GOAL_REACHED_FORMAT_TEXT = "pedometerGoalReachedFormatText";
 
   private int status;
 
@@ -74,25 +58,6 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
   private CallbackContext callbackContext;  // Keeps track of the JS callback context.
   private CallbackContext updateCallback;  // Keeps track of the persistent callback.
-
-  /**
-   * Constructor
-   */
-  public PedoListener() {
-
-  }
-
-  /**
-   * Sets the context of the Command. This can then be used to do things like
-   * get file paths associated with the Activity.
-   *
-   * @param cordova the context of the main Activity.
-   * @param webView the associated CordovaWebView.
-   */
-  @Override
-  public void initialize(CordovaInterface cordova, CordovaWebView webView) {
-    super.initialize(cordova, webView);
-  }
 
   /**
    * Executes the request.
@@ -150,7 +115,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
         PowerManager pm   = (PowerManager)getActivity().getSystemService(POWER_SERVICE);
   
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            this.fail(PedoListener.ERROR_BATTERY_OPTIMIZATION, "Permission not relevant on this device");
+            this.fail(Status.ERROR_BATTERY_OPTIMIZATION, "Permission not relevant on this device");
           return;
         }
   
@@ -165,7 +130,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
         cordova.startActivityForResult(this, intent, REQUEST_BATTERY_PERMS);
         answerLater();
     } catch(Exception e) {
-          this.fail(PedoListener.ERROR_BATTERY_OPTIMIZATION, e.getMessage());
+          this.fail(Status.ERROR_BATTERY_OPTIMIZATION, e.getMessage());
     }
   }
   
@@ -200,16 +165,16 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     SharedPreferences prefs = cordova.getContext().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
 
     if (pedometerIsCounting != null) {
-      prefs.edit().putString(PedoListener.PEDOMETER_IS_COUNTING_TEXT, pedometerIsCounting).apply();
+      prefs.edit().putString(Config.PEDOMETER_IS_COUNTING_TEXT, pedometerIsCounting).apply();
     }
     if (stepsToGo != null) {
-      prefs.edit().putString(PedoListener.PEDOMETER_STEPS_TO_GO_FORMAT_TEXT, stepsToGo).apply();
+      prefs.edit().putString(Config.PEDOMETER_STEPS_TO_GO_FORMAT_TEXT, stepsToGo).apply();
     }
     if (yourProgress != null) {
-      prefs.edit().putString(PedoListener.PEDOMETER_YOUR_PROGRESS_FORMAT_TEXT, yourProgress).apply();
+      prefs.edit().putString(Config.PEDOMETER_YOUR_PROGRESS_FORMAT_TEXT, yourProgress).apply();
     }
     if (goalReached != null) {
-      prefs.edit().putString(PedoListener.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, goalReached).apply();
+      prefs.edit().putString(Config.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, goalReached).apply();
     }
   }
 
@@ -224,7 +189,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
     SharedPreferences prefs = cordova.getContext().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
     if (goal >= 0) {
-      prefs.edit().putInt(PedoListener.GOAL_PREF_INT, goal).apply();
+      prefs.edit().putInt(Config.GOAL_PREF_INT, goal).apply();
     }
   }
 
@@ -296,7 +261,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   }
 
   public void onPause(boolean multitasking) {
-    status = PedoListener.PAUSED;
+    status = Status.PAUSED;
     uninitSensor();
   }
 
@@ -331,7 +296,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     if (sensor != null) {
       this.win(true);
     } else {
-      this.status = PedoListener.ERROR_NO_SENSOR_FOUND;
+      this.status = Status.ERROR_NO_SENSOR_FOUND;
       this.win(false);
     }
   }
@@ -346,8 +311,8 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
           for (String perm : permissions) {
             errmsg += " " + perm;
           }
-          this.status = PedoListener.ERROR_NO_PERMISSION;
-          this.fail(PedoListener.ERROR_NO_PERMISSION, "Permission denied: " + permissions[i]);
+          this.status = Status.ERROR_NO_PERMISSION;
+          this.fail(Status.ERROR_NO_PERMISSION, "Permission denied: " + permissions[i]);
           return;
         }
       }
@@ -367,7 +332,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
 
     // If already starting or running, then return
-    if ((status == PedoListener.RUNNING) || (status == PedoListener.STARTING)) {
+    if ((status == Status.RUNNING) || (status == Status.STARTING)) {
       prefs.edit().putBoolean("enabled", true).commit();
       updateUI();
       return;
@@ -393,7 +358,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     try {
       goal = args.getInt(0);
       if (goal >= 0) {
-        prefs.edit().putInt(PedoListener.GOAL_PREF_INT, goal).apply();
+        prefs.edit().putInt(Config.GOAL_PREF_INT, goal).apply();
       }
     } catch (JSONException e) {}
     
@@ -430,7 +395,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 	SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
     prefs.edit().putBoolean("enabled", false).commit();
     
-    if (status != PedoListener.STOPPED) {
+    if (status != Status.STOPPED) {
       uninitSensor();
     }
     
@@ -441,7 +406,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     }
 
     getActivity().stopService(new Intent(getActivity(), SensorListener.class));
-    status = PedoListener.STOPPED;
+    status = Status.STOPPED;
 
     win();
   }
@@ -449,7 +414,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
   private void initSensor() {
 	SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
     // If already starting or running, then return
-    if (status == PedoListener.RUNNING || status == PedoListener.STARTING) {
+    if (status == Status.RUNNING || status == Status.STARTING) {
       prefs.edit().putBoolean("enabled", true).commit();
       updateUI();
       return;
@@ -459,7 +424,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     
     todayOffset = db.getSteps(Util.getToday());
 
-    goal = prefs.getInt(PedoListener.GOAL_PREF_INT, PedoListener.DEFAULT_GOAL);
+    goal = prefs.getInt(Config.GOAL_PREF_INT, Config.DEFAULT_GOAL);
     since_boot = db.getCurrentSteps();
 
     // register a sensor listener to live update the UI if a step is taken
@@ -467,7 +432,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
     sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
     if (sensor == null) {
       prefs.edit().putBoolean("enabled", false).commit();
-      this.fail(PedoListener.ERROR_NO_SENSOR_FOUND, "Not Step counter sensor found");
+      this.fail(Status.ERROR_NO_SENSOR_FOUND, "Not Step counter sensor found");
       return;
     } else {
       sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME, 0);
@@ -478,7 +443,7 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
     db.close();
 
-    status = PedoListener.STARTING;
+    status = Status.STARTING;
 
     updateUI();
   }
@@ -496,10 +461,10 @@ public class PedoListener extends CordovaPlugin implements SensorEventListener {
 
   @Override
   public void onSensorChanged(final SensorEvent event) {
-    if (status == PedoListener.STOPPED) {
+    if (status == Status.STOPPED) {
       return;
     }
-    status = PedoListener.RUNNING;
+    status = Status.RUNNING;
 
     if (event.values[0] > Integer.MAX_VALUE || event.values[0] == 0 || event.values[0] < 0) {
       return;
