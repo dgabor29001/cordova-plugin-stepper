@@ -75,6 +75,9 @@ The `options` parameter may contain optional parameters. Below parameters recomm
 - pedometerStepsToGoFormatText - _string_ - Set description format string with text for notification
 - pedometerYourProgressFormatText - _string_ - Set progress description format string with text for notification
 - pedometerGoalReachedFormatText - _string_ - Set goal description format string with text for notification when the number of steps reaches the target value
+- timeZone - _string_ - Android only - Force timezone for aggregation ticks
+- aggregateTicksInterval - _number_ - Android only - change tick interval for aggregation ticks (default 24*60 min = one day)
+
 
 Example:
 ```js
