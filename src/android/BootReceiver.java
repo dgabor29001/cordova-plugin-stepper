@@ -12,37 +12,20 @@ import org.apache.cordova.stepper.util.API26Wrapper;
 
 public class BootReceiver extends BroadcastReceiver {
 
-    @Override
-    public void onReceive(final Context context, final Intent intent) {
-      SharedPreferences prefs = context.getSharedPreferences("pedometer", Context.MODE_PRIVATE);
-      Log.i("STEPPER", "BootReceiver.onReceive enabled:"+prefs.getBoolean("enabled", false)+", intent_action="+intent.getAction());
-      if (!prefs.getBoolean("enabled", false)) {
-        return;
-      }
-      if (intent != null) {
-        if (intent.getAction().equalsIgnoreCase(
-          Intent.ACTION_BOOT_COMPLETED)) {
-
-          Database db = Database.getInstance(context);
-
-          if (!prefs.getBoolean("correctShutdown", false)) {
-            // can we at least recover some steps?
-            int steps = Math.max(0, db.getCurrentSteps());
-            db.addToLastEntry(steps);
-          }
-          // last entry might still have a negative step value, so remove that
-          // row if that's the case
-          db.removeNegativeEntries();
-          db.saveCurrentSteps(0);
-          db.close();
-          prefs.edit().remove("correctShutdown").apply();
-
-          if (Build.VERSION.SDK_INT >= 26) {
-            API26Wrapper.startForegroundService(context, new Intent(context, SensorListener.class));
-          } else {
-            context.startService(new Intent(context, SensorListener.class));
-          }
-        }
-      }
-    }
+	@Override
+	public void onReceive(final Context context, final Intent intent) {
+		SharedPreferences prefs = context.getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+		Log.i("STEPPER", "BootReceiver.onReceive enabled:" + prefs.getBoolean("enabled", false) + ", intent_action="
+				+ intent.getAction());
+		if (!prefs.getBoolean("enabled", false)) {
+			return;
+		}
+		if (intent.getAction().equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED)) {
+			if (Build.VERSION.SDK_INT >= 26) {
+				API26Wrapper.startForegroundService(context, new Intent(context, SensorListener.class));
+			} else {
+				context.startService(new Intent(context, SensorListener.class));
+			}
+		}
+	}
 }

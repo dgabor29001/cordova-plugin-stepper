@@ -14,8 +14,8 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        Log.i("STEPPER", "AppUpdatedReceiver.onReceive");
         SharedPreferences prefs = context.getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+        Log.i("STEPPER", "AppUpdatedReceiver.onReceive enabled:"+prefs.getBoolean("enabled", false));
         if (!prefs.getBoolean("enabled", false)) {
           return;
         }

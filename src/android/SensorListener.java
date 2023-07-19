@@ -24,9 +24,11 @@ import org.apache.cordova.stepper.util.API23Wrapper;
 import org.apache.cordova.stepper.util.API26Wrapper;
 import org.apache.cordova.stepper.util.Util;
 import org.apache.cordova.stepper.util.Config;
+import org.apache.cordova.stepper.util.Entry;
 
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * Background service which keeps the step-sensor listener alive to always get
@@ -37,201 +39,207 @@ import java.util.Locale;
  */
 public class SensorListener extends Service implements SensorEventListener {
 
-  public final static int NOTIFICATION_ID = 1;
-  private final static long MICROSECONDS_IN_ONE_MINUTE = 60000000;
-  private final static long SAVE_OFFSET_TIME = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
-  private final static int SAVE_OFFSET_STEPS = 30;
+	public final static int NOTIFICATION_ID = 1;
+	private final static long MICROSECONDS_IN_ONE_MINUTE = 60000000;
+	private final static long SAVE_OFFSET_TIME_MS = 300000;
+	private final static int SAVE_OFFSET_STEPS = 30;
 
-  private static int steps;
-  private static int lastSaveSteps;
-  private static long lastSaveTime;
+	private TimeZone timeZone = TimeZone.getDefault();
 
-  private static int notificationIconId = 0;
+	private int todaySavedSteps;
+	private int currentIndex;
+	private int lastSavedIndex;
+	private long lastSaveTime;
 
-  private final BroadcastReceiver shutdownReceiver = new ShutdownReceiver();
+	private static int notificationIconId = 0;
 
-  @Override
-  public void onAccuracyChanged(final Sensor sensor, int accuracy) {
+	@Override
+	public void onAccuracyChanged(final Sensor sensor, int accuracy) {
+		Log.i("STEPPER", "SensorListener.onAccuracyChanged " + accuracy);
+	}
 
-  }
+	@Override
+	public void onSensorChanged(final SensorEvent event) {
+		Log.d("STEPPER", "SensorListener.onSensorChanged " + event.values[0]);
+		if (!Util.isSameDay(System.currentTimeMillis(), lastSaveTime, timeZone))	{
+			todaySavedSteps = 0;
+		}
+		if (event.values[0] > Integer.MAX_VALUE || event.values[0] < 0) {
+			return;
+		}
+		currentIndex = (int) event.values[0];
+		if (currentIndex > lastSavedIndex + SAVE_OFFSET_STEPS || (currentIndex > 0 && System.currentTimeMillis() > lastSaveTime + SAVE_OFFSET_TIME_MS)) {
+			saveCurrentIndex();
+		}
+		StepperPlugin.updateUI(todaySteps());
+		showNotification();
+	}
+	
+	private int todaySteps() {
+		return todaySavedSteps + currentIndex - lastSavedIndex;
+	}
 
-  @Override
-  public void onSensorChanged(final SensorEvent event) {
-	if (event.values[0] > Integer.MAX_VALUE || event.values[0] < 0) {
-      return;
-    } else {
-      steps = (int) event.values[0];
-      updateIfNecessary();
-    }
-  }
+	private void saveCurrentIndex() {
+		Log.i("STEPPER", "SensorListener.saveCurrentIndex");
+		if (lastSaveTime > currentTime) {
+			Log.e("STEPPER", "lastSaveTime > currentTime : "+lastSaveTime+" > " + currentTime);
+			return;
+		}
+		Database db = Database.getInstance(this);
+		int currentTime = System.currentTimeMillis();
+		if (currentIndex < lastSavedIndex || (currentIndex - lastSavedIndex > 1000 && (currentIndex - lastSavedIndex) * 60000 / (currentTime - lastSaveTime) >= 500)) {
+			// index jump detected
+			Log.i("STEPPER", "Index jump detected lastSavedIndex="+lastSavedIndex +", lastSaveTime="+lastSaveTime+", currentIndex=" + currentIndex+", currentTime=" + currentTime);
+			db.createNewEntry(currentTime, currentIndex);		
+		} else {
+			db.updateLatestEntry(currentTime, currentIndex);
+			if (!Util.isSameHour(currentTime, lastSaveTime, timeZone)) {
+				db.createNewEntry(currentTime, currentIndex);
+			}
+			todaySavedSteps += lastSavedIndex - currentIndex;
+		}
+		db.close();
+		lastSavedIndex = currentIndex;
+		lastSaveTime = currentTime;
+	}
 
-  /**
-   * @return true, if notification was updated
-   */
-  private boolean updateIfNecessary() {
-    if (steps > lastSaveSteps + SAVE_OFFSET_STEPS ||
-      (steps > 0 && System.currentTimeMillis() > lastSaveTime + SAVE_OFFSET_TIME)) {
-      Database db = Database.getInstance(this);
-      if (db.getSteps(Util.getToday()) == Integer.MIN_VALUE) {
-        db.insertNewDay(Util.getToday(), steps);
-      }
-      db.saveCurrentSteps(steps);
-      db.close();
-      lastSaveSteps = steps;
-      lastSaveTime = System.currentTimeMillis();
-      showNotification(); // update notification
-      return true;
-    } else {
-      showNotification(); // update notification
-      return false;
-    }
-  }
+	private void showNotification() {
+		if (getSharedPreferences("pedometer", Context.MODE_PRIVATE).getBoolean("notification", true)) {
+			if (Build.VERSION.SDK_INT >= 26) {
+				startForeground(NOTIFICATION_ID, getNotification());
+			} else {
+				((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID,
+						getNotification());
+			}
+		}
+	}
 
-  private void showNotification() {
-    if (Build.VERSION.SDK_INT >= 26) {
-      startForeground(NOTIFICATION_ID, getNotification(this));
-    } else if (getSharedPreferences("pedometer", Context.MODE_PRIVATE)
-      .getBoolean("notification", true)) {
-      ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE))
-        .notify(NOTIFICATION_ID, getNotification(this));
-    }
-  }
+	@Override
+	public int onStartCommand(final Intent intent, int flags, int startId) {
+		Log.i("STEPPER", "SensorListener.onStartCommand");
+		
+		SharedPreferences prefs = getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+		String timeZoneString = prefs.getString(Config.TIMEZONE, null);
+		if (timeZoneString != null) this.timeZone = TimeZone.getTimeZone(timeZoneString);
+		
+		reRegisterSensor();
+		Database db = Database.getInstance(this);
+		todaySavedSteps = db.getSteps(Util.getToday(), System.currentTimeMillis(), timeZone);
+		List<Entry> lastEntry = db.getLastEntries(1);
+		db.close();
+		if (!lastEntry.isEmpty()) {
+			currentIndex = lastSavedIndex = lastEntry.get(0).endIndex;
+			lastSaveTime = lastEntry.get(0).endTimestamp;
+		}
+		StepperPlugin.updateUI(todaySavedSteps);
 
-  @Override
-  public IBinder onBind(final Intent intent) {
-    return null;
-  }
+		// restart service every fifteen minutes to save the current step count
+		long nextUpdate = Math.min(Util.getNextHour(timeZone),
+				System.currentTimeMillis() + AlarmManager.INTERVAL_FIFTEEN_MINUTES);
+		AlarmManager am = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+		PendingIntent pi = PendingIntent.getService(getApplicationContext(), 2, new Intent(this, SensorListener.class),
+				PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+		if (Build.VERSION.SDK_INT >= 23) {
+			API23Wrapper.setAlarmWhileIdle(am, AlarmManager.RTC, nextUpdate, pi);
+		} else {
+			am.set(AlarmManager.RTC, nextUpdate, pi);
+		}
 
-  @Override
-  public int onStartCommand(final Intent intent, int flags, int startId) {
-	Log.i("STEPPER", "SensorListener.onStartCommand");
-    reRegisterSensor();
-    registerBroadcastReceiver();
-    updateIfNecessary();
+		return START_STICKY;
+	}
 
-    // restart service every fifteen minutes to save the current step count
-    long nextUpdate = Math.min(Util.getTomorrow(),
-      System.currentTimeMillis() + AlarmManager.INTERVAL_FIFTEEN_MINUTES);
-    AlarmManager am =
-      (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-    PendingIntent pi = PendingIntent
-      .getService(getApplicationContext(), 2, new Intent(this, SensorListener.class),
-        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-    if (Build.VERSION.SDK_INT >= 23) {
-      API23Wrapper.setAlarmWhileIdle(am, AlarmManager.RTC, nextUpdate, pi);
-    } else {
-      am.set(AlarmManager.RTC, nextUpdate, pi);
-    }
+	@Override
+	public void onCreate() {
+		Log.i("STEPPER", "SensorListener.onCreate");
+		super.onCreate();
+	}
 
-    return START_STICKY;
-  }
+	private int getNotificationIconId() {
+		int drawableId = getResources().getIdentifier("ic_footsteps_silhouette_variant", "drawable",
+				getApplicationInfo().packageName);
+		if (drawableId == 0) {
+			drawableId = getApplicationInfo().icon;
+		}
+		return drawableId;
+	}
 
-  @Override
-  public void onCreate() {
-	Log.i("STEPPER", "SensorListener.onCreate");
-    super.onCreate();
-  }
+	@Override
+	public void onTaskRemoved(final Intent rootIntent) {
+		Log.i("STEPPER", "SensorListener.onTaskRemoved");
+		super.onTaskRemoved(rootIntent);
+		// Restart service in 500 ms
+		((AlarmManager) getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC, System.currentTimeMillis() + 500,
+				PendingIntent.getService(this, 3, new Intent(this, SensorListener.class),
+						PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+	}
 
-  private static int getNotificationIconId(Context context) {
-    int drawableId = context.getResources().getIdentifier("ic_footsteps_silhouette_variant", "drawable",
-      context.getApplicationInfo().packageName);
-    if (drawableId == 0) {
-      drawableId = context.getApplicationInfo().icon;
-    }
-    return drawableId;
-  }
+	@Override
+	public void onDestroy() {
+		Log.i("STEPPER", "SensorListener.onDestroy");
+		saveCurrentIndex();
+		super.onDestroy();
+		try {
+			SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
+			sm.unregisterListener(this);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-  @Override
-  public void onTaskRemoved(final Intent rootIntent) {
-	Log.i("STEPPER", "SensorListener.onTaskRemoved");
-    super.onTaskRemoved(rootIntent);
-    // Restart service in 500 ms
-    ((AlarmManager) getSystemService(Context.ALARM_SERVICE))
-      .set(AlarmManager.RTC, System.currentTimeMillis() + 500, PendingIntent
-        .getService(this, 3, new Intent(this, SensorListener.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
-  }
+	public Notification getNotification() {
+		SharedPreferences prefs = getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+		int goal = prefs.getInt(Config.GOAL_PREF_INT, Config.DEFAULT_GOAL);
+		int todaySteps = todaySteps();
+		Notification.Builder notificationBuilder = Build.VERSION.SDK_INT >= 26
+				? API26Wrapper.getNotificationBuilder(context)
+				: new Notification.Builder(context);
+		if (todaySteps > 0) {
+			notificationBuilder.setProgress(goal, todaySteps, false)
+					.setContentText(todaySteps >= Math.max(goal, 1)
+							? String.format(
+									prefs.getString(Config.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, "%s steps today"),
+									NumberFormat.getInstance(Locale.getDefault()).format(todaySteps),
+									NumberFormat.getInstance(Locale.getDefault()).format(goal))
+							: String.format(prefs.getString(Config.PEDOMETER_STEPS_TO_GO_FORMAT_TEXT, "%s steps to go"),
+									NumberFormat.getInstance(Locale.getDefault()).format(goal - todaySteps),
+									NumberFormat.getInstance(Locale.getDefault()).format(todaySteps),
+									NumberFormat.getInstance(Locale.getDefault()).format(goal)));
+		} else { // still no step value?
+			notificationBuilder.setContentText(prefs.getString(Config.PEDOMETER_YOUR_PROGRESS_FORMAT_TEXT,
+					"Your progress will be shown here soon"));
+		}
 
-  @Override
-  public void onDestroy() {
-	Log.i("STEPPER", "SensorListener.onDestroy");
-    super.onDestroy();
-    try {
-      SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
-      sm.unregisterListener(this);
-      unregisterReceiver(shutdownReceiver);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+		PackageManager packageManager = context.getPackageManager();
+		Intent launchIntent = packageManager.getLaunchIntentForPackage(context.getPackageName());
 
-  public static Notification getNotification(final Context context) {
-    SharedPreferences prefs = context.getSharedPreferences("pedometer", Context.MODE_PRIVATE);
-    Database db = Database.getInstance(context);
-    int today_offset = db.getSteps(Util.getToday());
-    if (steps == 0)
-      steps = db.getCurrentSteps(); // use saved value if we haven't anything better
-    db.close();
-    int goal = prefs.getInt(Config.GOAL_PREF_INT, Config.DEFAULT_GOAL);
-    Notification.Builder notificationBuilder =
-      Build.VERSION.SDK_INT >= 26 ? API26Wrapper.getNotificationBuilder(context) :
-        new Notification.Builder(context);
-    if (steps > 0) {
-      if (today_offset == Integer.MIN_VALUE) today_offset = -steps;
-      notificationBuilder.setProgress(goal, today_offset + steps, false).setContentText(
-        today_offset + steps >= Math.max(goal,1) ?
-          String.format(prefs.getString(Config.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, "%s steps today"),
-            NumberFormat.getInstance(Locale.getDefault())
-              .format(today_offset + steps),
-            NumberFormat.getInstance(Locale.getDefault())
-              .format(goal)) :
-          String.format(prefs.getString(Config.PEDOMETER_STEPS_TO_GO_FORMAT_TEXT, "%s steps to go"),
-            NumberFormat.getInstance(Locale.getDefault())
-              .format(goal - today_offset - steps),
-            NumberFormat.getInstance(Locale.getDefault())
-              .format(today_offset + steps),
-            NumberFormat.getInstance(Locale.getDefault())
-              .format(goal)));
-    } else { // still no step value?
-      notificationBuilder.setContentText(prefs.getString(Config.PEDOMETER_YOUR_PROGRESS_FORMAT_TEXT, "Your progress will be shown here soon"));
-    }
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launchIntent,
+				PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-    PackageManager packageManager = context.getPackageManager();
-    Intent launchIntent = packageManager.getLaunchIntentForPackage(context.getPackageName());
+		if (notificationIconId == 0) {
+			notificationIconId = getNotificationIconId();
+		}
 
-    PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-      launchIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+		notificationBuilder.setPriority(Notification.PRIORITY_DEFAULT).setShowWhen(false)
+				.setContentTitle(prefs.getString(Config.PEDOMETER_IS_COUNTING_TEXT, "Pedometer is counting"))
+				.setContentIntent(contentIntent).setSmallIcon(notificationIconId).setOngoing(true);
+		return notificationBuilder.build();
+	}
 
-    if (notificationIconId == 0) {
-      notificationIconId = getNotificationIconId(context);
-    }
+	private void reRegisterSensor() {
+		SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
+		try {
+			sm.unregisterListener(this);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-    notificationBuilder.setPriority(Notification.PRIORITY_DEFAULT).setShowWhen(false)
-      .setContentTitle(prefs.getString(Config.PEDOMETER_IS_COUNTING_TEXT, "Pedometer is counting"))
-      .setContentIntent(contentIntent).setSmallIcon(notificationIconId)
-      .setOngoing(true);
-    return notificationBuilder.build();
-  }
+		if (BuildConfig.DEBUG) {
+			if (sm.getSensorList(Sensor.TYPE_STEP_COUNTER).size() < 1)
+				return; // emulator
+		}
 
-  private void registerBroadcastReceiver() {
-    IntentFilter filter = new IntentFilter();
-    filter.addAction(Intent.ACTION_SHUTDOWN);
-    registerReceiver(shutdownReceiver, filter);
-  }
-
-  private void reRegisterSensor() {
-    SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
-    try {
-      sm.unregisterListener(this);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    if (BuildConfig.DEBUG) {
-      if (sm.getSensorList(Sensor.TYPE_STEP_COUNTER).size() < 1) return; // emulator
-    }
-
-    // enable batching with delay of max 2 min
-    sm.registerListener(this, sm.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
-      SensorManager.SENSOR_DELAY_GAME, (int) (2 * MICROSECONDS_IN_ONE_MINUTE));
-  }
+		// enable batching with delay of max 2 min
+		sm.registerListener(this, sm.getDefaultSensor(Sensor.TYPE_STEP_COUNTER), SensorManager.SENSOR_DELAY_GAME,
+				(int) (2 * MICROSECONDS_IN_ONE_MINUTE));
+	}
 }

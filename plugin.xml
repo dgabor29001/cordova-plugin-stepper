@@ -66,11 +66,11 @@
         <source-file src="src/android/BootReceiver.java" target-dir="src/org/apache/cordova/stepper" />
         <source-file src="src/android/Database.java" target-dir="src/org/apache/cordova/stepper" />
         <source-file src="src/android/SensorListener.java" target-dir="src/org/apache/cordova/stepper" />
-        <source-file src="src/android/ShutdownReceiver.java" target-dir="src/org/apache/cordova/stepper" />
         <source-file src="src/android/util/API23Wrapper.java" target-dir="src/org/apache/cordova/stepper/util" />
         <source-file src="src/android/util/API26Wrapper.java" target-dir="src/org/apache/cordova/stepper/util" />
         <source-file src="src/android/util/Logger.java" target-dir="src/org/apache/cordova/stepper/util" />
         <source-file src="src/android/util/Util.java" target-dir="src/org/apache/cordova/stepper/util" />
+        <source-file src="src/android/util/Entry.java" target-dir="src/org/apache/cordova/stepper/util" />
         <source-file src="src/android/util/Config.java" target-dir="src/org/apache/cordova/stepper/util" />
         <source-file src="src/android/util/Status.java" target-dir="src/org/apache/cordova/stepper/util" />
         <source-file src="src/android/res/drawable/ic_footsteps_silhouette_variant.xml" target-dir="res/drawable" />
