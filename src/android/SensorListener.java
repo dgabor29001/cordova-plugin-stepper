@@ -79,15 +79,18 @@ public class SensorListener extends Service implements SensorEventListener {
 	}
 
 	private void saveCurrentIndex() {
+		long currentTime = System.currentTimeMillis();
 		Log.i("STEPPER", "SensorListener.saveCurrentIndex lastSavedIndex=" + lastSavedIndex + ", lastSaveTime="
 				+ lastSaveTime + ", currentIndex=" + currentIndex + ", currentTime=" + currentTime);
-		long currentTime = System.currentTimeMillis();
 		if (lastSaveTime > currentTime) {
 			Log.e("STEPPER", "lastSaveTime > currentTime : " + lastSaveTime + " > " + currentTime);
 			return;
 		}
 		Database db = Database.getInstance(this);
-		if (currentIndex < lastSavedIndex || (currentIndex - lastSavedIndex > 1000
+		if (currentTime - lastSaveTime >= 3 * 24 * 3600 * 1000) {
+			Log.i("STEPPER", "Last save was long time ago");
+			db.createNewEntry(currentTime, currentIndex);
+		} else if (currentIndex < lastSavedIndex || (currentIndex - lastSavedIndex > 1000
 				&& (currentIndex - lastSavedIndex) * 60000 / (currentTime - lastSaveTime) >= 500)) {
 			// index jump detected
 			Log.i("STEPPER", "Index jump detected");
@@ -97,7 +100,7 @@ public class SensorListener extends Service implements SensorEventListener {
 			if (!Util.isSameHour(currentTime, lastSaveTime, timeZone)) {
 				db.createNewEntry(currentTime, currentIndex);
 			}
-			todaySavedSteps += lastSavedIndex - currentIndex;
+			todaySavedSteps += currentIndex - lastSavedIndex;
 		}
 		db.close();
 		lastSavedIndex = currentIndex;
