@@ -66,7 +66,7 @@ public class StepperPlugin extends CordovaPlugin {
 	 * @return whether the action was valid.
 	 */
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-		Log.i("STEPPER", "StepperPlugin.execute(\""+action+"\")");
+		Log.i("STEPPER", "StepperPlugin.execute(\"" + action + "\")");
 		this.callbackContext = callbackContext;
 		if (action.equals("isStepCountingAvailable")) {
 			isStepCountingAvailable();
@@ -411,6 +411,7 @@ public class StepperPlugin extends CordovaPlugin {
 	}
 
 	public static void updateUI(int todaySteps) {
+		Log.i("STEPPER", "StepperPlugin.updateUI updateCallback=" + (updateCallback != null) + " todaySteps=" + todaySteps);
 		if (updateCallback != null) {
 			JSONObject result = new JSONObject();
 			try {
@@ -418,7 +419,7 @@ public class StepperPlugin extends CordovaPlugin {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-	
+
 			PluginResult r = new PluginResult(PluginResult.Status.OK, result);
 			r.setKeepCallback(true);
 			updateCallback.sendPluginResult(r);

@@ -79,7 +79,8 @@ public class SensorListener extends Service implements SensorEventListener {
 	}
 
 	private void saveCurrentIndex() {
-		Log.i("STEPPER", "SensorListener.saveCurrentIndex");
+		Log.i("STEPPER", "SensorListener.saveCurrentIndex lastSavedIndex=" + lastSavedIndex + ", lastSaveTime="
+				+ lastSaveTime + ", currentIndex=" + currentIndex + ", currentTime=" + currentTime);
 		long currentTime = System.currentTimeMillis();
 		if (lastSaveTime > currentTime) {
 			Log.e("STEPPER", "lastSaveTime > currentTime : " + lastSaveTime + " > " + currentTime);
@@ -89,8 +90,7 @@ public class SensorListener extends Service implements SensorEventListener {
 		if (currentIndex < lastSavedIndex || (currentIndex - lastSavedIndex > 1000
 				&& (currentIndex - lastSavedIndex) * 60000 / (currentTime - lastSaveTime) >= 500)) {
 			// index jump detected
-			Log.i("STEPPER", "Index jump detected lastSavedIndex=" + lastSavedIndex + ", lastSaveTime=" + lastSaveTime
-					+ ", currentIndex=" + currentIndex + ", currentTime=" + currentTime);
+			Log.i("STEPPER", "Index jump detected");
 			db.createNewEntry(currentTime, currentIndex);
 		} else {
 			db.updateLatestEntry(currentTime, currentIndex);
@@ -143,16 +143,20 @@ public class SensorListener extends Service implements SensorEventListener {
 		// restart service every fifteen minutes to save the current step count
 		long nextUpdate = Math.min(Util.getNextHour(timeZone),
 				System.currentTimeMillis() + AlarmManager.INTERVAL_FIFTEEN_MINUTES);
-		AlarmManager am = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-		PendingIntent pi = PendingIntent.getService(getApplicationContext(), 2, new Intent(this, SensorListener.class),
-				PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-		if (Build.VERSION.SDK_INT >= 23) {
-			API23Wrapper.setAlarmWhileIdle(am, AlarmManager.RTC, nextUpdate, pi);
-		} else {
-			am.set(AlarmManager.RTC, nextUpdate, pi);
-		}
+		scheduleStart(nextUpdate, 2);
 
 		return START_STICKY;
+	}
+
+	private void scheduleStart(long timestamp, int taskId) {
+		AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		PendingIntent pi = PendingIntent.getService(this, taskId, new Intent(this, SensorListener.class),
+				PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+		if (Build.VERSION.SDK_INT >= 23) {
+			API23Wrapper.setAlarmWhileIdle(am, AlarmManager.RTC, timestamp, pi);
+		} else {
+			am.set(AlarmManager.RTC, timestamp, pi);
+		}
 	}
 
 	@Override
@@ -175,9 +179,7 @@ public class SensorListener extends Service implements SensorEventListener {
 		Log.i("STEPPER", "SensorListener.onTaskRemoved");
 		super.onTaskRemoved(rootIntent);
 		// Restart service in 500 ms
-		((AlarmManager) getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC, System.currentTimeMillis() + 500,
-				PendingIntent.getService(this, 3, new Intent(this, SensorListener.class),
-						PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+		scheduleStart(System.currentTimeMillis() + 500, 3);
 	}
 
 	@Override
