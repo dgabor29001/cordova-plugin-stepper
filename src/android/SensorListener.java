@@ -48,8 +48,8 @@ public class SensorListener extends Service implements SensorEventListener {
 	private static TimeZone timeZone = TimeZone.getDefault();
 
 	private static int todaySavedSteps;
-	private static long currentIndex;
-	private static long lastSavedIndex;
+	public static long currentIndex;
+	public static long lastSavedIndex;
 	private static long lastSaveTime;
 
 	private static int notificationIconId = 0;
