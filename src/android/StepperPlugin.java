@@ -198,6 +198,13 @@ public class StepperPlugin extends CordovaPlugin {
 		Database db = Database.getInstance(getActivity());
 		int steps = db.getSteps(startdate, endate);
 		db.close();
+		
+		if (startdate <= System.currentTimeMillis() && endate >= System.currentTimeMillis()) {
+			int diff = (int) (SensorListener.currentIndex - SensorListener.lastSavedIndex);
+			if (diff > 0 && diff < 500) {
+	          steps += diff;
+			}
+	    }
 
 		JSONObject joresult = new JSONObject();
 		try {
