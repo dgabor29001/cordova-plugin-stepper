@@ -45,18 +45,20 @@ public class SensorListener extends Service implements SensorEventListener {
 	private final static long SAVE_OFFSET_TIME_MS = 300000;
 	private final static int SAVE_OFFSET_STEPS = 30;
 
-	private TimeZone timeZone = TimeZone.getDefault();
+	private static TimeZone timeZone = TimeZone.getDefault();
 
-	private int todaySavedSteps;
-	private long currentIndex;
-	private long lastSavedIndex;
-	private long lastSaveTime;
+	private static int todaySavedSteps;
+	private static long currentIndex;
+	private static long lastSavedIndex;
+	private static long lastSaveTime;
 
 	private static int notificationIconId = 0;
-
+	
+	private final BroadcastReceiver shutdownReceiver = new ShutdownReceiver();
+	  
 	@Override
 	public void onAccuracyChanged(final Sensor sensor, int accuracy) {
-		Log.i("STEPPER", "SensorListener.onAccuracyChanged " + accuracy);
+		Log.d("STEPPER", "SensorListener.onAccuracyChanged " + accuracy);
 	}
 
 	@Override
@@ -68,7 +70,7 @@ public class SensorListener extends Service implements SensorEventListener {
 		currentIndex = (long) event.values[0];
 		if (currentIndex > lastSavedIndex + SAVE_OFFSET_STEPS
 				|| (currentIndex > 0 && System.currentTimeMillis() > lastSaveTime + SAVE_OFFSET_TIME_MS)) {
-			saveCurrentIndex();
+			saveCurrentIndex(getApplicationContext());
 		}
 		StepperPlugin.updateUI(todaySteps());
 		showNotification();
@@ -78,7 +80,13 @@ public class SensorListener extends Service implements SensorEventListener {
 		return (int) (todaySavedSteps + currentIndex - lastSavedIndex);
 	}
 
-	private void saveCurrentIndex() {
+	private void registerBroadcastReceiver() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(Intent.ACTION_SHUTDOWN);
+		registerReceiver(shutdownReceiver, filter);
+	}
+
+	public static void saveCurrentIndex(Context context) {
 		long currentTime = System.currentTimeMillis();
 		Log.i("STEPPER", "SensorListener.saveCurrentIndex lastSavedIndex=" + lastSavedIndex + ", lastSaveTime="
 				+ lastSaveTime + ", currentIndex=" + currentIndex + ", currentTime=" + currentTime);
@@ -86,7 +94,7 @@ public class SensorListener extends Service implements SensorEventListener {
 			Log.e("STEPPER", "lastSaveTime > currentTime : " + lastSaveTime + " > " + currentTime);
 			return;
 		}
-		Database db = Database.getInstance(this);
+		Database db = Database.getInstance(context);
 		if (currentTime - lastSaveTime >= 3 * 24 * 3600 * 1000) {
 			Log.i("STEPPER", "Last save was long time ago");
 			db.createNewEntry(currentTime, currentIndex);
@@ -133,7 +141,10 @@ public class SensorListener extends Service implements SensorEventListener {
 			this.timeZone = TimeZone.getTimeZone(timeZoneString);
 
 		reRegisterSensor();
-		Database db = Database.getInstance(this);
+		registerBroadcastReceiver();
+		
+		// Load history from db
+		Database db = Database.getInstance(getApplicationContext());
 		todaySavedSteps = db.getSteps(Util.getToday(timeZone), System.currentTimeMillis());
 		List<Entry> lastEntry = db.getLastEntries(1);
 		db.close();
@@ -141,6 +152,8 @@ public class SensorListener extends Service implements SensorEventListener {
 			currentIndex = lastSavedIndex = lastEntry.get(0).endIndex;
 			lastSaveTime = lastEntry.get(0).endTimestamp;
 		}
+		Log.d("STEPPER", "Loaded history from db todaySavedSteps=" + todaySavedSteps + ", lastSaveTime=" + lastSaveTime
+				+ ", lastSavedIndex=" + lastSavedIndex);
 		StepperPlugin.updateUI(todaySavedSteps);
 
 		// restart service every fifteen minutes to save the current step count
@@ -180,6 +193,7 @@ public class SensorListener extends Service implements SensorEventListener {
 	@Override
 	public void onTaskRemoved(final Intent rootIntent) {
 		Log.i("STEPPER", "SensorListener.onTaskRemoved");
+		saveCurrentIndex(getApplicationContext());
 		super.onTaskRemoved(rootIntent);
 		// Restart service in 500 ms
 		scheduleStart(System.currentTimeMillis() + 500, 3);
@@ -188,11 +202,12 @@ public class SensorListener extends Service implements SensorEventListener {
 	@Override
 	public void onDestroy() {
 		Log.i("STEPPER", "SensorListener.onDestroy");
-		saveCurrentIndex();
+		saveCurrentIndex(getApplicationContext());
 		super.onDestroy();
 		try {
 			SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
-			sm.unregisterListener(this);
+			sm.unregisterListener(getApplicationContext());
+			unregisterReceiver(shutdownReceiver);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -202,8 +217,8 @@ public class SensorListener extends Service implements SensorEventListener {
 		SharedPreferences prefs = getSharedPreferences("pedometer", Context.MODE_PRIVATE);
 		int goal = prefs.getInt(Config.GOAL_PREF_INT, Config.DEFAULT_GOAL);
 		Notification.Builder notificationBuilder = Build.VERSION.SDK_INT >= 26
-				? API26Wrapper.getNotificationBuilder(this)
-				: new Notification.Builder(this);
+				? API26Wrapper.getNotificationBuilder(getApplicationContext())
+				: new Notification.Builder(getApplicationContext());
 		if (todaySteps() > 0) {
 			notificationBuilder.setProgress(goal, todaySteps(), false).setContentText(todaySteps() >= Math.max(goal, 1)
 					? String.format(prefs.getString(Config.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, "%s steps today"),
@@ -237,7 +252,7 @@ public class SensorListener extends Service implements SensorEventListener {
 	private void reRegisterSensor() {
 		SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
 		try {
-			sm.unregisterListener(this);
+			sm.unregisterListener(getApplicationContext());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
