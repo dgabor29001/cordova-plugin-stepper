@@ -376,6 +376,7 @@ public class StepperPlugin extends CordovaPlugin {
 	}
 
 	private void start() {
+		Log.i("STEPPER", "StepperPlugin.start");
 		SharedPreferences prefs = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
 		prefs.edit().putBoolean("enabled", true).commit();
 		if (Build.VERSION.SDK_INT >= 26) {
@@ -386,6 +387,7 @@ public class StepperPlugin extends CordovaPlugin {
 	}
 
 	private void stop(JSONArray args) {
+		Log.i("STEPPER", "StepperPlugin.stop");
 		boolean clearDatabase = false;
 		try {
 			clearDatabase = args.getBoolean(0);

@@ -40,7 +40,6 @@ public abstract class Util {
     public static long getNextHour(TimeZone timeZone) {
         Calendar c = Calendar.getInstance(timeZone);
         c.setTimeInMillis(System.currentTimeMillis());
-        c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 1);
         c.set(Calendar.MILLISECOND, 0);
