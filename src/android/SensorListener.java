@@ -154,11 +154,9 @@ public class SensorListener extends Service implements SensorEventListener {
 		}
 		Log.d("STEPPER", "Loaded history from db todaySavedSteps=" + todaySavedSteps + ", lastSaveTime=" + lastSaveTime
 				+ ", lastSavedIndex=" + lastSavedIndex);
-		StepperPlugin.updateUI(todaySavedSteps);
 
 		// restart service every fifteen minutes to save the current step count
-		long nextUpdate = Math.min(Util.getNextHour(timeZone),
-				System.currentTimeMillis() + AlarmManager.INTERVAL_FIFTEEN_MINUTES);
+		long nextUpdate = Math.min(Util.getNextHour(timeZone), System.currentTimeMillis() + AlarmManager.INTERVAL_FIFTEEN_MINUTES);
 		scheduleStart(nextUpdate, 2);
 
 		return START_STICKY;
@@ -206,7 +204,7 @@ public class SensorListener extends Service implements SensorEventListener {
 		super.onDestroy();
 		try {
 			SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
-			sm.unregisterListener(getApplicationContext());
+			sm.unregisterListener(this);
 			unregisterReceiver(shutdownReceiver);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -252,7 +250,7 @@ public class SensorListener extends Service implements SensorEventListener {
 	private void reRegisterSensor() {
 		SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
 		try {
-			sm.unregisterListener(getApplicationContext());
+			sm.unregisterListener(this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
