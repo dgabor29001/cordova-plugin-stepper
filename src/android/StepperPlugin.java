@@ -26,6 +26,7 @@ import android.content.SharedPreferences;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.Sensor;
 import android.os.PowerManager;
 import org.apache.cordova.stepper.util.API26Wrapper;
 import org.apache.cordova.stepper.util.Config;
@@ -74,7 +75,7 @@ public class StepperPlugin extends CordovaPlugin {
 		} else if (action.equals("disableBatteryOptimizations")) {
 			disableBatteryOptimizations();
 		} else if (action.equals("startStepperUpdates")) {
-			this.updateCallback = callbackContext;
+			updateCallback = callbackContext;
 			start(args);
 		} else if (action.equals("stopStepperUpdates")) {
 			stop(args);
@@ -407,8 +408,8 @@ public class StepperPlugin extends CordovaPlugin {
 		win();
 	}
 
-	public static void updateUI(int stepsToday) {
-		if (this.updateCallback != null) {
+	public static void updateUI(int todaySteps) {
+		if (updateCallback != null) {
 			JSONObject result = new JSONObject();
 			try {
 				result.put("steps_today", todaySteps);
@@ -418,7 +419,7 @@ public class StepperPlugin extends CordovaPlugin {
 	
 			PluginResult r = new PluginResult(PluginResult.Status.OK, result);
 			r.setKeepCallback(true);
-			this.updateCallback.sendPluginResult(r);
+			updateCallback.sendPluginResult(r);
 		}
 	}
 

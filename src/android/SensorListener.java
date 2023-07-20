@@ -29,6 +29,7 @@ import org.apache.cordova.stepper.util.Entry;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.List;
 
 /**
  * Background service which keeps the step-sensor listener alive to always get
@@ -47,8 +48,8 @@ public class SensorListener extends Service implements SensorEventListener {
 	private TimeZone timeZone = TimeZone.getDefault();
 
 	private int todaySavedSteps;
-	private int currentIndex;
-	private int lastSavedIndex;
+	private long currentIndex;
+	private long lastSavedIndex;
 	private long lastSaveTime;
 
 	private static int notificationIconId = 0;
@@ -61,36 +62,36 @@ public class SensorListener extends Service implements SensorEventListener {
 	@Override
 	public void onSensorChanged(final SensorEvent event) {
 		Log.d("STEPPER", "SensorListener.onSensorChanged " + event.values[0]);
-		if (!Util.isSameDay(System.currentTimeMillis(), lastSaveTime, timeZone))	{
+		if (!Util.isSameDay(System.currentTimeMillis(), lastSaveTime, timeZone)) {
 			todaySavedSteps = 0;
 		}
-		if (event.values[0] > Integer.MAX_VALUE || event.values[0] < 0) {
-			return;
-		}
-		currentIndex = (int) event.values[0];
-		if (currentIndex > lastSavedIndex + SAVE_OFFSET_STEPS || (currentIndex > 0 && System.currentTimeMillis() > lastSaveTime + SAVE_OFFSET_TIME_MS)) {
+		currentIndex = (long) event.values[0];
+		if (currentIndex > lastSavedIndex + SAVE_OFFSET_STEPS
+				|| (currentIndex > 0 && System.currentTimeMillis() > lastSaveTime + SAVE_OFFSET_TIME_MS)) {
 			saveCurrentIndex();
 		}
 		StepperPlugin.updateUI(todaySteps());
 		showNotification();
 	}
-	
+
 	private int todaySteps() {
-		return todaySavedSteps + currentIndex - lastSavedIndex;
+		return (int) (todaySavedSteps + currentIndex - lastSavedIndex);
 	}
 
 	private void saveCurrentIndex() {
 		Log.i("STEPPER", "SensorListener.saveCurrentIndex");
+		long currentTime = System.currentTimeMillis();
 		if (lastSaveTime > currentTime) {
-			Log.e("STEPPER", "lastSaveTime > currentTime : "+lastSaveTime+" > " + currentTime);
+			Log.e("STEPPER", "lastSaveTime > currentTime : " + lastSaveTime + " > " + currentTime);
 			return;
 		}
 		Database db = Database.getInstance(this);
-		int currentTime = System.currentTimeMillis();
-		if (currentIndex < lastSavedIndex || (currentIndex - lastSavedIndex > 1000 && (currentIndex - lastSavedIndex) * 60000 / (currentTime - lastSaveTime) >= 500)) {
+		if (currentIndex < lastSavedIndex || (currentIndex - lastSavedIndex > 1000
+				&& (currentIndex - lastSavedIndex) * 60000 / (currentTime - lastSaveTime) >= 500)) {
 			// index jump detected
-			Log.i("STEPPER", "Index jump detected lastSavedIndex="+lastSavedIndex +", lastSaveTime="+lastSaveTime+", currentIndex=" + currentIndex+", currentTime=" + currentTime);
-			db.createNewEntry(currentTime, currentIndex);		
+			Log.i("STEPPER", "Index jump detected lastSavedIndex=" + lastSavedIndex + ", lastSaveTime=" + lastSaveTime
+					+ ", currentIndex=" + currentIndex + ", currentTime=" + currentTime);
+			db.createNewEntry(currentTime, currentIndex);
 		} else {
 			db.updateLatestEntry(currentTime, currentIndex);
 			if (!Util.isSameHour(currentTime, lastSaveTime, timeZone)) {
@@ -115,16 +116,22 @@ public class SensorListener extends Service implements SensorEventListener {
 	}
 
 	@Override
+	public IBinder onBind(final Intent intent) {
+		return null;
+	}
+
+	@Override
 	public int onStartCommand(final Intent intent, int flags, int startId) {
 		Log.i("STEPPER", "SensorListener.onStartCommand");
-		
+
 		SharedPreferences prefs = getSharedPreferences("pedometer", Context.MODE_PRIVATE);
 		String timeZoneString = prefs.getString(Config.TIMEZONE, null);
-		if (timeZoneString != null) this.timeZone = TimeZone.getTimeZone(timeZoneString);
-		
+		if (timeZoneString != null)
+			this.timeZone = TimeZone.getTimeZone(timeZoneString);
+
 		reRegisterSensor();
 		Database db = Database.getInstance(this);
-		todaySavedSteps = db.getSteps(Util.getToday(), System.currentTimeMillis(), timeZone);
+		todaySavedSteps = db.getSteps(Util.getToday(timeZone), System.currentTimeMillis());
 		List<Entry> lastEntry = db.getLastEntries(1);
 		db.close();
 		if (!lastEntry.isEmpty()) {
@@ -189,30 +196,27 @@ public class SensorListener extends Service implements SensorEventListener {
 	public Notification getNotification() {
 		SharedPreferences prefs = getSharedPreferences("pedometer", Context.MODE_PRIVATE);
 		int goal = prefs.getInt(Config.GOAL_PREF_INT, Config.DEFAULT_GOAL);
-		int todaySteps = todaySteps();
 		Notification.Builder notificationBuilder = Build.VERSION.SDK_INT >= 26
-				? API26Wrapper.getNotificationBuilder(context)
-				: new Notification.Builder(context);
-		if (todaySteps > 0) {
-			notificationBuilder.setProgress(goal, todaySteps, false)
-					.setContentText(todaySteps >= Math.max(goal, 1)
-							? String.format(
-									prefs.getString(Config.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, "%s steps today"),
-									NumberFormat.getInstance(Locale.getDefault()).format(todaySteps),
-									NumberFormat.getInstance(Locale.getDefault()).format(goal))
-							: String.format(prefs.getString(Config.PEDOMETER_STEPS_TO_GO_FORMAT_TEXT, "%s steps to go"),
-									NumberFormat.getInstance(Locale.getDefault()).format(goal - todaySteps),
-									NumberFormat.getInstance(Locale.getDefault()).format(todaySteps),
-									NumberFormat.getInstance(Locale.getDefault()).format(goal)));
+				? API26Wrapper.getNotificationBuilder(this)
+				: new Notification.Builder(this);
+		if (todaySteps() > 0) {
+			notificationBuilder.setProgress(goal, todaySteps(), false).setContentText(todaySteps() >= Math.max(goal, 1)
+					? String.format(prefs.getString(Config.PEDOMETER_GOAL_REACHED_FORMAT_TEXT, "%s steps today"),
+							NumberFormat.getInstance(Locale.getDefault()).format(todaySteps()),
+							NumberFormat.getInstance(Locale.getDefault()).format(goal))
+					: String.format(prefs.getString(Config.PEDOMETER_STEPS_TO_GO_FORMAT_TEXT, "%s steps to go"),
+							NumberFormat.getInstance(Locale.getDefault()).format(goal - todaySteps()),
+							NumberFormat.getInstance(Locale.getDefault()).format(todaySteps()),
+							NumberFormat.getInstance(Locale.getDefault()).format(goal)));
 		} else { // still no step value?
 			notificationBuilder.setContentText(prefs.getString(Config.PEDOMETER_YOUR_PROGRESS_FORMAT_TEXT,
 					"Your progress will be shown here soon"));
 		}
 
-		PackageManager packageManager = context.getPackageManager();
-		Intent launchIntent = packageManager.getLaunchIntentForPackage(context.getPackageName());
+		PackageManager packageManager = getPackageManager();
+		Intent launchIntent = packageManager.getLaunchIntentForPackage(getPackageName());
 
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launchIntent,
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, launchIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
 		if (notificationIconId == 0) {
