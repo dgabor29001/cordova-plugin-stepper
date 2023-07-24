@@ -75,6 +75,9 @@ public class Database extends SQLiteOpenHelper {
 						+ ", endIndex = endIndex + " + currentSteps + " WHERE endIndex < 0");
 			}
 			c.close();
+			long currentTime = System.currentTimeMillis();
+			db.execSQL("UPDATE " + DB_NAME + "2 SET endTimestamp = "+ currentTime + " WHERE endTimestamp > " + currentTime);
+			db.execSQL("DELETE FROM " + DB_NAME + "2 WHERE endTimestamp < startTimestamp");
 			db.execSQL("DROP TABLE " + DB_NAME);
 			db.execSQL("ALTER TABLE " + DB_NAME + "2 RENAME TO " + DB_NAME + "");
 		}
