@@ -29,7 +29,7 @@ public class Database extends SQLiteOpenHelper {
 		super(context, DB_NAME, null, DB_VERSION);
 	}
 
-	public static synchronized Database getInstance(final Context c) {
+	public static synchronized Database *(final Context c) {
 		if (instance == null) {
 			instance = new Database(c.getApplicationContext());
 		}
@@ -46,12 +46,14 @@ public class Database extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(final SQLiteDatabase db) {
+		Log.e("STEPPER", "Database.onCreate");
 		db.execSQL("CREATE TABLE " + DB_NAME
 				+ " (startTimestamp INTEGER, startIndex INTEGER, endTimestamp INTEGER, endIndex INTEGER)");
 	}
 
 	@Override
 	public void onUpgrade(final SQLiteDatabase db, int oldVersion, int newVersion) {
+		Log.i("STEPPER", "Database.onUpgrade "+oldVersion+" => "+newVersion);
 		if (oldVersion <= 1) {
 			// drop PRIMARY KEY constraint
 			db.execSQL("CREATE TABLE " + DB_NAME + "2 (date INTEGER, steps INTEGER)");
@@ -76,6 +78,7 @@ public class Database extends SQLiteOpenHelper {
 			db.execSQL("DROP TABLE " + DB_NAME);
 			db.execSQL("ALTER TABLE " + DB_NAME + "2 RENAME TO " + DB_NAME + "");
 		}
+		Log.i("STEPPER", "Database upgrade complete");
 	}
 
 	/**
