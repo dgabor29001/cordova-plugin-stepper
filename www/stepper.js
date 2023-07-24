@@ -79,59 +79,21 @@ Stepper.prototype.destroy = function (onSuccess, onError) {
     return this.stopStepperUpdates(true, onSuccess, onError);
 };
 
-// Android - Not Available - UnDocumented
-Stepper.prototype.getCurrentSteps = function (onSuccess, onError) {
-    let promise = new Promise(function(resolve, reject) {
-        exec(resolve, reject, "Stepper", "getCurrentSteps", []);
-    });
-    if (onSuccess) promise = promise.then(onSuccess);
-    if (onError) promise = promise.catch(onError);
-    return promise;
-};
-
-// Android - Not Available - UnDocumented
-Stepper.prototype.getDays = function (onSuccess, onError) {
-    let promise = new Promise(function(resolve, reject) {
-        exec(resolve, reject, "Stepper", "getDays", []);
-    });
-    if (onSuccess) promise = promise.then(onSuccess);
-    if (onError) promise = promise.catch(onError);
-    return promise;
-};
-
-// Android - Not Available - UnDocumented
-Stepper.prototype.getDaysWithoutToday = function (onSuccess, onError) {
-    let promise = new Promise(function(resolve, reject) {
-        exec(resolve, reject, "Stepper", "getDaysWithoutToday", []);
-    });
-    if (onSuccess) promise = promise.then(onSuccess);
-    if (onError) promise = promise.catch(onError);
-    return promise;
-};
-
 // IOS & Android - Documented
 Stepper.prototype.getSteps = function (date, onSuccess, onError) {
-    return this.getStepsByPeriod(date || new Date(), date, onSuccess, onError);
+	const startDate = new Date(date || new Date());
+	startDate.setHours(0,0,0,0);
+	const endDate = new Date(date || new Date());
+	endDate.setHours(23,59,59,999);
+    return this.getStepsByPeriod(startDate, endDate, onSuccess, onError);
 };
 
 // IOS & Android - Documented
 Stepper.prototype.getStepsByPeriod = function (start, end, onSuccess, onError) {
-    const startDate = new Date(start || 0);
-    startDate.setHours(0, 0, 0, 0);
-    const endDate = new Date(end || new Date());
-    endDate.setHours(23, 59, 59, 999);
+    const startDate = start instanceof Date ? start : new Date(start);
+    const endDate = end instanceof Date ? end : new Date(end);
     let promise = new Promise(function(resolve, reject) {
         exec(resolve, reject, "Stepper", "getStepsByPeriod", [startDate.toISOString(), endDate.toISOString()]);
-    });
-    if (onSuccess) promise = promise.then(onSuccess);
-    if (onError) promise = promise.catch(onError);
-    return promise;
-};
-
-// Android - Not Available - UnDocumented
-Stepper.prototype.getTotalWithoutToday = function (onSuccess, onError) {
-    let promise = new Promise(function(resolve, reject) {
-        exec(resolve, reject, "Stepper", "getTotalWithoutToday", []);
     });
     if (onSuccess) promise = promise.then(onSuccess);
     if (onError) promise = promise.catch(onError);
