@@ -70,9 +70,10 @@ public class Database extends SQLiteOpenHelper {
 			Cursor c = db.query(DB_NAME, new String[] { "steps" }, "date = ?", new String[] { "-1" }, null, null, null);
 			c.moveToFirst();
 			if (c.getCount() > 0) {
-				int currentSteps = c.getInt(0);
-				db.execSQL("UPDATE " + DB_NAME + "2 SET startIndex = startIndex + " + currentSteps
-						+ ", endIndex = endIndex + " + currentSteps + " WHERE endIndex < 0");
+				int currentIndex = c.getInt(0);
+				db.execSQL("UPDATE " + DB_NAME + "2 SET startIndex = -endIndex , endIndex = " + currentIndex + " WHERE endIndex < 0");
+			} else {
+				db.execSQL("UPDATE " + DB_NAME + "2 SET startIndex = -endIndex , endIndex = -endIndex WHERE endIndex < 0");
 			}
 			c.close();
 			long currentTime = System.currentTimeMillis();
