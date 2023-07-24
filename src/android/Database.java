@@ -29,7 +29,7 @@ public class Database extends SQLiteOpenHelper {
 		super(context, DB_NAME, null, DB_VERSION);
 	}
 
-	public static synchronized Database *(final Context c) {
+	public static synchronized Database getInstance(final Context c) {
 		if (instance == null) {
 			instance = new Database(c.getApplicationContext());
 		}
@@ -53,7 +53,7 @@ public class Database extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(final SQLiteDatabase db, int oldVersion, int newVersion) {
-		Log.i("STEPPER", "Database.onUpgrade "+oldVersion+" => "+newVersion);
+		Log.i("STEPPER", "Database.onUpgrade " + oldVersion + " => " + newVersion);
 		if (oldVersion <= 1) {
 			// drop PRIMARY KEY constraint
 			db.execSQL("CREATE TABLE " + DB_NAME + "2 (date INTEGER, steps INTEGER)");
@@ -76,7 +76,8 @@ public class Database extends SQLiteOpenHelper {
 			}
 			c.close();
 			long currentTime = System.currentTimeMillis();
-			db.execSQL("UPDATE " + DB_NAME + "2 SET endTimestamp = "+ currentTime + " WHERE endTimestamp > " + currentTime);
+			db.execSQL("UPDATE " + DB_NAME + "2 SET endTimestamp = " + currentTime + " WHERE endTimestamp > "
+					+ currentTime);
 			db.execSQL("DELETE FROM " + DB_NAME + "2 WHERE endTimestamp < startTimestamp");
 			db.execSQL("DROP TABLE " + DB_NAME);
 			db.execSQL("ALTER TABLE " + DB_NAME + "2 RENAME TO " + DB_NAME + "");
@@ -105,13 +106,12 @@ public class Database extends SQLiteOpenHelper {
 		c.close();
 		return result;
 	}
-	
+
 	public void clearOldEntries() {
-		long limit = System.currentTimeMillis() - 7*24*3600*1000;
+		long limit = System.currentTimeMillis() - 7 * 24 * 3600 * 1000;
 		getWritableDatabase().execSQL("DELETE FROM " + DB_NAME + " WHERE endTimestamp < " + limit);
 	}
 
-	
 	public void updateLatestEntry(long currentTime, long currentIndex) {
 		List<Entry> lastEntry = getLastEntries(1);
 		if (lastEntry.size() == 0) {
@@ -121,10 +121,10 @@ public class Database extends SQLiteOpenHelper {
 		ContentValues values = new ContentValues();
 		values.put("endTimestamp", currentTime);
 		values.put("endIndex", currentIndex);
-		
+
 		getWritableDatabase().update(DB_NAME, values, "startTimestamp = " + lastEntry.get(0).startTimestamp, null);
 	}
-	
+
 	public void createNewEntry(long currentTime, long currentIndex) {
 		ContentValues values = new ContentValues();
 		values.put("startTimestamp", currentTime);
