@@ -14,36 +14,20 @@
 
 @implementation Stepper
 
-- (CMPedometer*) pedometer {
-    if (_pedometer == nil) {
-        _pedometer = [[CMPedometer alloc] init];
-    }
-    return _pedometer;
-}
-
-- (void) isStepCountingAvailable:(CDVInvokedUrlCommand*)command;
-{
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[CMPedometer isStepCountingAvailable]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void) isDistanceAvailable:(CDVInvokedUrlCommand*)command;
-{
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[CMPedometer isDistanceAvailable]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void) isFloorCountingAvailable:(CDVInvokedUrlCommand*)command;
-{
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[CMPedometer isFloorCountingAvailable]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
 - (void) startStepperUpdates:(CDVInvokedUrlCommand*)command;
 {
     __block CDVPluginResult* pluginResult = nil;
     
-    NSDate* startDate = [[NSCalendar currentCalendar] startOfDayForDate:[NSDate date]];
+    NSDictionary *options = [command.arguments objectAtIndex:0];
+    NSString *timeZone = [options objectForKey:@"timeZone"];
+    NSTimeZone *selectedTimeZone = [NSTimeZone timeZoneWithName:timeZone];
+    
+    NSDate *startDate;
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    if (selectedTimeZone) {
+        calendar.timeZone = selectedTimeZone;
+    }
+    [calendar rangeOfUnit:NSCalendarUnitDay startDate:&startDate interval:NULL forDate:currentDate];
     
     [self.pedometer startPedometerUpdatesFromDate:startDate withHandler:^(CMPedometerData *pedometerData, NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{

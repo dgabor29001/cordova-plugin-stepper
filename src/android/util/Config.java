@@ -12,6 +12,5 @@ public class Config {
   public static String PEDOMETER_GOAL_REACHED_FORMAT_TEXT = "pedometerGoalReachedFormatText";
   
   public static String TIMEZONE = "timeZone";
-  public static String AGGREGATE_TICKS_INTERVAL = "aggregateTicksInterval";
 
 }
