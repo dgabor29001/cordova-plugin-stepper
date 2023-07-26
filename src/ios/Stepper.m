@@ -27,6 +27,7 @@
     if (selectedTimeZone) {
         calendar.timeZone = selectedTimeZone;
     }
+    NSDate *currentDate = [NSDate date];
     [calendar rangeOfUnit:NSCalendarUnitDay startDate:&startDate interval:NULL forDate:currentDate];
     
     [self.pedometer startPedometerUpdatesFromDate:startDate withHandler:^(CMPedometerData *pedometerData, NSError *error) {
