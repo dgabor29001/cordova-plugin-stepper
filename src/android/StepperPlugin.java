@@ -336,10 +336,6 @@ public class StepperPlugin extends CordovaPlugin {
 		if (options.has(Config.TIMEZONE)) {
 			prefs.edit().putString(Config.TIMEZONE, options.getString(Config.TIMEZONE)).commit();
 		}
-		if (options.has(Config.AGGREGATE_TICKS_INTERVAL)) {
-			prefs.edit().putInt(Config.AGGREGATE_TICKS_INTERVAL, options.getInt(Config.AGGREGATE_TICKS_INTERVAL))
-					.commit();
-		}
 
 		// Set options
 		if (options.has(Config.PEDOMETER_GOAL_REACHED_FORMAT_TEXT)) {
