@@ -63,7 +63,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
 	@Override
 	public void onSensorChanged(final SensorEvent event) {
-		Log.d("STEPPER", "SensorListener.onSensorChanged " + event.values[0]);
+		Log.v("STEPPER", "SensorListener.onSensorChanged " + event.values[0]);
 		if (!Util.isSameDay(System.currentTimeMillis(), lastSaveTime, timeZone)) {
 			todaySavedSteps = 0;
 		}

@@ -414,7 +414,7 @@ public class StepperPlugin extends CordovaPlugin {
 	}
 
 	public static void updateUI(int todaySteps) {
-		Log.d("STEPPER", "StepperPlugin.updateUI updateCallback=" + (updateCallback != null) + " todaySteps=" + todaySteps);
+		Log.v("STEPPER", "StepperPlugin.updateUI updateCallback=" + (updateCallback != null) + " todaySteps=" + todaySteps);
 		if (updateCallback != null) {
 			JSONObject result = new JSONObject();
 			try {
