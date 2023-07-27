@@ -110,6 +110,7 @@ public class Database extends SQLiteOpenHelper {
 	}
 
 	public void clearOldEntries() {
+		Log.i("STEPPER", "Database.clearOldEntries");
 		long limit = System.currentTimeMillis() - 7 * 24 * 3600 * 1000;
 		getWritableDatabase().execSQL("DELETE FROM " + DB_NAME + " WHERE endTimestamp < " + limit);
 	}
