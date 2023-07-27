@@ -32,6 +32,7 @@ public class Database extends SQLiteOpenHelper {
 	public static synchronized Database getInstance(final Context c) {
 		if (instance == null) {
 			instance = new Database(c.getApplicationContext());
+			instance.clearOldEntries();
 		}
 		openCounter.incrementAndGet();
 		return instance;
@@ -95,8 +96,8 @@ public class Database extends SQLiteOpenHelper {
 	 */
 	public List<Entry> getLastEntries(int num) {
 		Cursor c = getReadableDatabase().query(DB_NAME,
-				new String[] { "startTimestamp", "startIndex", "endTimestamp", "endIndex" }, null, null, null, null,
-				"endTimestamp DESC", String.valueOf(num));
+				new String[] { "startTimestamp", "startIndex", "endTimestamp", "endIndex" }, "startTimestamp < ?", new String[] { System.currentTimeMillis() }, null, null,
+				"startTimestamp DESC", String.valueOf(num));
 		int max = c.getCount();
 		List<Entry> result = new ArrayList<Entry>(max);
 		if (c.moveToFirst()) {
