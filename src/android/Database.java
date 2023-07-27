@@ -96,7 +96,7 @@ public class Database extends SQLiteOpenHelper {
 	 */
 	public List<Entry> getLastEntries(int num) {
 		Cursor c = getReadableDatabase().query(DB_NAME,
-				new String[] { "startTimestamp", "startIndex", "endTimestamp", "endIndex" }, "startTimestamp < ?", new String[] { System.currentTimeMillis() }, null, null,
+				new String[] { "startTimestamp", "startIndex", "endTimestamp", "endIndex" }, "startTimestamp < " + System.currentTimeMillis(), null, null, null,
 				"startTimestamp DESC", String.valueOf(num));
 		int max = c.getCount();
 		List<Entry> result = new ArrayList<Entry>(max);
