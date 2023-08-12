@@ -47,7 +47,10 @@ Stepper.prototype.startStepperUpdates = function(options, onSuccess, onError, ex
         opts = options;
     }
     exec((result) => {
-    	if (result && result.startDate && result.startDate < new Date().setHours(0,0,0,0)) {
+		var now = new Date();
+        const hms = now.toLocaleString("en-UK", {timeZone: options.timeZone || undefined}).split(", ")[1].split(":");
+        startOfDay = new Date(now.getTime() - hms[0]*3600000 - hms[1]*60000 - hms[2]*1000);
+    	if (result && result.startDate && result.startDate < startOfDay) {
     		this.stopStepperUpdates(
     			false,
         	    this.startStepperUpdates.bind(this, options, onSuccess, onError, extra),
