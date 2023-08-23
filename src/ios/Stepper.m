@@ -49,7 +49,8 @@
     if (timeZone) {
         calendar.timeZone = [NSTimeZone timeZoneWithName:timeZone];
     }
-    NSDate *startDate = [calendar startOfDayForDate:[NSDate date]];
+    NSDateComponents *dateComponents = [calendar components:NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay fromDate:[NSDate date]];
+    NSDate *startDate = [calendar dateFromComponents:dateComponents];
     
     [self.pedometer startPedometerUpdatesFromDate:startDate withHandler:^(CMPedometerData *pedometerData, NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
