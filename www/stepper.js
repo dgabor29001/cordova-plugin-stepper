@@ -46,11 +46,11 @@ Stepper.prototype.startStepperUpdates = function(options, onSuccess, onError, ex
     if (typeof(options) === "object") {
         opts = options;
     }
+    const now = new Date();
+    const hms = now.toLocaleString("en-UK", {timeZone: options.timeZone || undefined}).split(", ")[1].split(":");
+    const endOfDay = new Date(now.getTime() - hms[0]*3600000 - hms[1]*60000 - hms[2]*1000 + 24*3600000);
     exec((result) => {
-		var now = new Date();
-        const hms = now.toLocaleString("en-UK", {timeZone: options.timeZone || undefined}).split(", ")[1].split(":");
-        startOfDay = new Date(now.getTime() - hms[0]*3600000 - hms[1]*60000 - hms[2]*1000);
-    	if (result && result.startDate && result.startDate < startOfDay) {
+    	if (result && result.startDate && new Date() >= endOfDay) {
     		this.stopStepperUpdates(
     			false,
         	    this.startStepperUpdates.bind(this, options, onSuccess, onError, extra),
