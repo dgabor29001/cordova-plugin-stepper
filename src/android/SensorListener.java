@@ -64,15 +64,27 @@ public class SensorListener extends Service implements SensorEventListener {
 	@Override
 	public void onSensorChanged(final SensorEvent event) {
 		Log.v("STEPPER", "SensorListener.onSensorChanged " + event.values[0]);
-		currentIndex = (long) event.values[0];
+		currentIndex = (long) event.values[0];	
 		if (!Util.isSameDay(System.currentTimeMillis(), lastSaveTime, timeZone)) {
-			saveCurrentIndex(getApplicationContext());
+			todaySavedSteps = 0;
+			try {
+			  StepperPlugin.updateUI(todaySteps());
+			  showNotification();
+			} finally {
+				saveCurrentIndex(getApplicationContext());
+			}
 		} else if (currentIndex > lastSavedIndex + SAVE_OFFSET_STEPS
 				|| (currentIndex > 0 && System.currentTimeMillis() > lastSaveTime + SAVE_OFFSET_TIME_MS)) {
-			saveCurrentIndex(getApplicationContext());
+			try {
+			  StepperPlugin.updateUI(todaySteps());
+			  showNotification();
+			} finally {
+				saveCurrentIndex(getApplicationContext());
+			}
+		} else {
+			StepperPlugin.updateUI(todaySteps());
+			showNotification();
 		}
-		StepperPlugin.updateUI(todaySteps());
-		showNotification();
 	}
 
 	private int todaySteps() {
