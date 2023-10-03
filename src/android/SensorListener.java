@@ -156,6 +156,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
 		reRegisterSensor();
 		registerBroadcastReceiver();
+		showNotification();
 		
 		// Load history from db
 		Database db = Database.getInstance(getApplicationContext());
