@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Database extends SQLiteOpenHelper {
 
 	private final static String DB_NAME = "steps";
-	private final static int DB_VERSION = 3;
+	private final static int DB_VERSION = 4;
 
 	private static Database instance;
 	private static final AtomicInteger openCounter = new AtomicInteger();
@@ -50,6 +50,8 @@ public class Database extends SQLiteOpenHelper {
 		Log.e("STEPPER", "Database.onCreate");
 		db.execSQL("CREATE TABLE " + DB_NAME
 				+ " (startTimestamp INTEGER, startIndex INTEGER, endTimestamp INTEGER, endIndex INTEGER)");
+		db.execSQL("CREATE UNIQUE INDEX idx_startTimestamp ON " + DB_NAME + " (startTimestamp);");
+		db.execSQL("CREATE INDEX idx_endTimestamp ON " + DB_NAME + " (endTimestamp);");
 	}
 
 	@Override
@@ -83,6 +85,10 @@ public class Database extends SQLiteOpenHelper {
 			db.execSQL("DELETE FROM " + DB_NAME + "2 WHERE endTimestamp < startTimestamp");
 			db.execSQL("DROP TABLE " + DB_NAME);
 			db.execSQL("ALTER TABLE " + DB_NAME + "2 RENAME TO " + DB_NAME + "");
+		}
+		if (oldVersion <= 3) {
+			db.execSQL("CREATE UNIQUE INDEX idx_startTimestamp ON " + DB_NAME + " (startTimestamp);");
+			db.execSQL("CREATE INDEX idx_endTimestamp ON " + DB_NAME + " (endTimestamp);");
 		}
 		Log.i("STEPPER", "Database upgrade complete");
 	}
