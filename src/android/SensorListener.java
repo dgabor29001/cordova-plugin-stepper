@@ -66,7 +66,6 @@ public class SensorListener extends Service implements SensorEventListener {
 		Log.v("STEPPER", "SensorListener.onSensorChanged " + event.values[0]);
 		currentIndex = (long) event.values[0];
 		if (!Util.isSameDay(System.currentTimeMillis(), lastSaveTime, timeZone)) {
-			todaySavedSteps = 0;
 			saveCurrentIndex(getApplicationContext());
 		} else if (currentIndex > lastSavedIndex + SAVE_OFFSET_STEPS
 				|| (currentIndex > 0 && System.currentTimeMillis() > lastSaveTime + SAVE_OFFSET_TIME_MS)) {
@@ -88,6 +87,9 @@ public class SensorListener extends Service implements SensorEventListener {
 
 	public static void saveCurrentIndex(Context context) {
 		long currentTime = System.currentTimeMillis();
+		if (!Util.isSameDay(currentTime, lastSaveTime, timeZone)) {
+			todaySavedSteps = 0;
+		}
 		Log.i("STEPPER", "SensorListener.saveCurrentIndex lastSavedIndex=" + lastSavedIndex + ", lastSaveTime="
 				+ lastSaveTime + ", currentIndex=" + currentIndex + ", currentTime=" + currentTime);
 		if (lastSaveTime > currentTime) {
