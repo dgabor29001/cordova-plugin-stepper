@@ -206,10 +206,14 @@ public class SensorListener extends Service implements SensorEventListener {
 	@Override
 	public void onTaskRemoved(final Intent rootIntent) {
 		Log.i("STEPPER", "SensorListener.onTaskRemoved");
+		// Restart service in 2000 ms
+		try {
+		  scheduleStart(System.currentTimeMillis() + 2000, 3);
+		} catch(err) {
+			Log.e("STEPPER", "scheduleStart FAILED");
+		}
 		saveCurrentIndex(getApplicationContext());
 		super.onTaskRemoved(rootIntent);
-		// Restart service in 500 ms
-		scheduleStart(System.currentTimeMillis() + 500, 3);
 	}
 
 	@Override
