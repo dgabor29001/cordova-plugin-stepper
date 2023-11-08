@@ -209,7 +209,7 @@ public class SensorListener extends Service implements SensorEventListener {
 		// Restart service in 2000 ms
 		try {
 		  scheduleStart(System.currentTimeMillis() + 2000, 3);
-		} catch(err) {
+		} catch(Exception e) {
 			Log.e("STEPPER", "scheduleStart FAILED");
 		}
 		saveCurrentIndex(getApplicationContext());
