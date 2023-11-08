@@ -201,7 +201,7 @@ public class StepperPlugin extends CordovaPlugin {
 		
 		if (startdate <= System.currentTimeMillis() && endate >= System.currentTimeMillis()) {
 			int diff = (int) (SensorListener.currentIndex - SensorListener.lastSavedIndex);
-			if (diff > 0 && diff < 500) {
+			if (SensorListener.lastSavedIndex != -1l && diff > 0 && diff < 10000) {
 	          steps += diff;
 			}
 	    }

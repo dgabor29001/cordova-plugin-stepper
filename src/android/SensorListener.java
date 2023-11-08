@@ -49,7 +49,7 @@ public class SensorListener extends Service implements SensorEventListener {
 
 	private static int todaySavedSteps;
 	public static long currentIndex;
-	public static long lastSavedIndex;
+	public static long lastSavedIndex = -1l;
 	private static long lastSaveTime;
 
 	private static int notificationIconId = 0;
@@ -88,7 +88,12 @@ public class SensorListener extends Service implements SensorEventListener {
 	}
 
 	private int todaySteps() {
-		return (int) (todaySavedSteps + currentIndex - lastSavedIndex);
+		int steps = todaySavedSteps;
+		int diff = (int) (currentIndex - lastSavedIndex);
+		if (lastSavedIndex != -1l && diff > 0 && diff < 10000) {
+		  steps += diff;
+		}
+		return steps;
 	}
 
 	private void registerBroadcastReceiver() {
