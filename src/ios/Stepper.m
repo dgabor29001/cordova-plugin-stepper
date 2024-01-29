@@ -117,4 +117,54 @@
     }];
 }
 
+- (void)getLastEntries:(CDVInvokedUrlCommand*)command {
+    NSNumber *numberOfEntries = [command.arguments objectAtIndex:0];
+
+    if (![numberOfEntries isKindOfClass:[NSNumber class]]) {
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid argument. Please provide a valid number of entries."];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
+
+    NSInteger x = [numberOfEntries integerValue];
+
+    // Get the current date and time
+    NSDate *endDate = [NSDate date];
+
+    // Calculate the start date by subtracting x days from the current date
+    NSDate *startDate = [endDate dateByAddingTimeInterval:-(x * 24 * 60 * 60)];
+
+    __block CDVPluginResult* pluginResult = nil;
+
+    [self.pedometer queryPedometerDataFromDate:startDate toDate:endDate withHandler:^(CMPedometerData *pedometerData, NSError *error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (error) {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
+            } else {
+                NSMutableArray *entriesArray = [NSMutableArray array];
+
+                for (NSInteger i = 0; i < x; i++) {
+                    NSDictionary *pedestrianData = @{
+                        @"startDate": [NSString stringWithFormat:@"%f", [pedometerData.startDate timeIntervalSince1970] * 1000],
+                        @"endDate": [NSString stringWithFormat:@"%f", [pedometerData.endDate timeIntervalSince1970] * 1000],
+                        @"steps_today": [CMPedometer isStepCountingAvailable] && pedometerData.numberOfSteps ? pedometerData.numberOfSteps : [NSNumber numberWithInt:0],
+                        @"distance": [CMPedometer isDistanceAvailable] && pedometerData.distance ? pedometerData.distance : [NSNumber numberWithInt:0],
+                        @"floorsAscended": [CMPedometer isFloorCountingAvailable] && pedometerData.floorsAscended ? pedometerData.floorsAscended : [NSNumber numberWithInt:0],
+                        @"floorsDescended": [CMPedometer isFloorCountingAvailable] && pedometerData.floorsDescended ? pedometerData.floorsDescended : [NSNumber numberWithInt:0]
+                    };
+
+                    [entriesArray addObject:pedestrianData];
+
+                    // Move the start date one day forward for the next iteration
+                    startDate = [startDate dateByAddingTimeInterval:24 * 60 * 60];
+                }
+
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:entriesArray];
+            }
+
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        });
+    }];
+}
+
 @end
