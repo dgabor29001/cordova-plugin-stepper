@@ -121,50 +121,72 @@
     NSNumber *numberOfEntries = [command.arguments objectAtIndex:0];
 
     if (![numberOfEntries isKindOfClass:[NSNumber class]]) {
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid argument. Please provide a valid number of entries."];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        return;
+       CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid argument. Please provide a valid number of entries."];
+       [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+       return;
     }
 
     NSInteger x = [numberOfEntries integerValue];
 
+    // Use NSCalendar to get the start of the day
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+
     // Get the current date and time
     NSDate *endDate = [NSDate date];
+    endDate = [endDate dateByAddingTimeInterval:48 * 60 * 60];
 
-    // Calculate the start date by subtracting x days from the current date
-    NSDate *startDate = [endDate dateByAddingTimeInterval:-(x * 24 * 60 * 60)];
+    // Create a date components instance with the specified number of days
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.day = dateComponents.day - x;
+    
+    NSDate *originalStartDate = [calendar dateByAddingComponents:dateComponents toDate:endDate options:0];
+    
+    // Extract year, month, and day components
+    NSDateComponents *originalStartDateComponents = [calendar components:(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay) fromDate:originalStartDate];
+    
+    // Set time components to zero
+    originalStartDateComponents.hour = 0;
+    originalStartDateComponents.minute = 0;
+    originalStartDateComponents.second = 0;
+    
+    // Create the start of day date
+    NSDate *startDate = [calendar dateFromComponents:originalStartDateComponents];
 
-    __block CDVPluginResult* pluginResult = nil;
+   __block CDVPluginResult* pluginResult = nil;
 
-    [self.pedometer queryPedometerDataFromDate:startDate toDate:endDate withHandler:^(CMPedometerData *pedometerData, NSError *error) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (error) {
-                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
-            } else {
-                NSMutableArray *entriesArray = [NSMutableArray array];
+   NSMutableArray *entriesArray = [NSMutableArray array];
 
-                for (NSInteger i = 0; i < x; i++) {
-                    NSDictionary *pedestrianData = @{
-                        @"startDate": [NSString stringWithFormat:@"%f", [pedometerData.startDate timeIntervalSince1970] * 1000],
-                        @"endDate": [NSString stringWithFormat:@"%f", [pedometerData.endDate timeIntervalSince1970] * 1000],
-                        @"steps_today": [CMPedometer isStepCountingAvailable] && pedometerData.numberOfSteps ? pedometerData.numberOfSteps : [NSNumber numberWithInt:0],
-                        @"distance": [CMPedometer isDistanceAvailable] && pedometerData.distance ? pedometerData.distance : [NSNumber numberWithInt:0],
-                        @"floorsAscended": [CMPedometer isFloorCountingAvailable] && pedometerData.floorsAscended ? pedometerData.floorsAscended : [NSNumber numberWithInt:0],
-                        @"floorsDescended": [CMPedometer isFloorCountingAvailable] && pedometerData.floorsDescended ? pedometerData.floorsDescended : [NSNumber numberWithInt:0]
-                    };
+   NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+   [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
 
-                    [entriesArray addObject:pedestrianData];
 
-                    // Move the start date one day forward for the next iteration
-                    startDate = [startDate dateByAddingTimeInterval:24 * 60 * 60];
-                }
+   // Fetch pedometer data for each day starting from startDate until endDate
+   for (NSInteger i = 0; i < x; i++) {
+       [self.pedometer queryPedometerDataFromDate:startDate toDate:[startDate dateByAddingTimeInterval:24 * 60 * 60] withHandler:^(CMPedometerData *pedometerData, NSError *error) {
+           dispatch_async(dispatch_get_main_queue(), ^{
+               if (error) {
+                   pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
+               } else {
+                   NSDictionary *pedestrianData = @{
+                       @"data": [dateFormatter stringFromDate:pedometerData.startDate],
+                       @"steps": [CMPedometer isStepCountingAvailable] && pedometerData.numberOfSteps ? pedometerData.numberOfSteps : [NSNumber numberWithInt:0],
+                       @"distance": [CMPedometer isDistanceAvailable] && pedometerData.distance ? pedometerData.distance : [NSNumber numberWithInt:0]
+                   };
 
-                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:entriesArray];
-            }
+                   [entriesArray addObject:pedestrianData];
+               }
 
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        });
-    }];
-}
+               if (i == x - 1) {
+                   // If the last iteration, send the result
+                   pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:@{@"entries": entriesArray}];
+                   [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+               }
+           });
+       }];
+       
+       // Move the start date one day forward for the next iteration
+       startDate = [startDate dateByAddingTimeInterval:24 * 60 * 60];
+       }
+   }
 
 @end
