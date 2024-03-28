@@ -64,8 +64,8 @@ stepper.disableBatteryOptimizations().then((result) => {
 });
 ```
 
-#### startStepperUpdates (options, onSuccess, onError)
-Run with options and listener data updates. The success handler is called once during the first call and then called from the background thread whenever data is available.
+#### startStepperUpdates (options, onStepUpdate, onError)
+The onStepUpdate handler is called once during the first call and then called from the background thread whenever data is available.
 
 The method also creates a background service with notification (Android only).
 
@@ -100,15 +100,11 @@ In order to keep callbacks after restarting or resuming your app you have to rea
 ```js
 // Reattach on reboot (required)
 document.addEventListener("deviceready", () => {  
-	stepper.startStepperUpdates(offset, options).then(callback).catch((err) => {
-	  console.error(err);
-	});
+	stepper.startStepperUpdates(options, onStepUpdate, errorHandler);
 });
 // Reattach after pause/resume (which can sometimes lead to dettachment)
 document.addEventListener("resume", () => {  
-	stepper.startStepperUpdates(offset, options).then(callback).catch((err) => {
-	  console.error(err);
-	});
+	stepper.startStepperUpdates(options, onStepUpdate, errorHandler);
 });
 
 ```
