@@ -135,7 +135,9 @@ public class SensorListener extends Service implements SensorEventListener {
 
 	private void showNotification() {
 		if (getSharedPreferences("pedometer", Context.MODE_PRIVATE).getBoolean("notification", true)) {
-			if (Build.VERSION.SDK_INT >= 26) {
+			if (Build.VERSION.SDK_INT >= 34) {
+				startForeground(NOTIFICATION_ID, getNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH);
+		      	} else if (Build.VERSION.SDK_INT >= 26) {
 				startForeground(NOTIFICATION_ID, getNotification());
 			} else {
 				((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID,
