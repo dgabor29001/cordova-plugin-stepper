@@ -19,7 +19,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
-import org.apache.cordova.BuildConfig;
 import org.apache.cordova.stepper.util.API23Wrapper;
 import org.apache.cordova.stepper.util.API26Wrapper;
 import org.apache.cordova.stepper.util.Util;
@@ -277,11 +276,6 @@ public class SensorListener extends Service implements SensorEventListener {
 			sm.unregisterListener(this);
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-
-		if (BuildConfig.DEBUG) {
-			if (sm.getSensorList(Sensor.TYPE_STEP_COUNTER).size() < 1)
-				return; // emulator
 		}
 
 		// enable batching with delay of max 2 min
