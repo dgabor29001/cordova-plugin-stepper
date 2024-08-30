@@ -15,7 +15,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH;
+import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
@@ -137,7 +137,7 @@ public class SensorListener extends Service implements SensorEventListener {
 	private void showNotification() {
 		if (getSharedPreferences("pedometer", Context.MODE_PRIVATE).getBoolean("notification", true)) {
 			if (Build.VERSION.SDK_INT >= 34) {
-				startForeground(NOTIFICATION_ID, getNotification(), FOREGROUND_SERVICE_TYPE_HEALTH);
+				startForeground(NOTIFICATION_ID, getNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH);
 			} else if (Build.VERSION.SDK_INT >= 26) {
 				startForeground(NOTIFICATION_ID, getNotification());
 			} else {
