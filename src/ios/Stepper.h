@@ -16,5 +16,6 @@
 - (void) stopStepperUpdates:(CDVInvokedUrlCommand*)command;
 
 - (void) getStepsByPeriod:(CDVInvokedUrlCommand*)command;
+- (void) getLastEntries:(CDVInvokedUrlCommand*)command;
 
 @end
