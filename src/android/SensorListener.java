@@ -41,7 +41,6 @@ import java.util.List;
 public class SensorListener extends Service implements SensorEventListener {
 
 	public final static int NOTIFICATION_ID = 1;
-	private final static long MICROSECONDS_IN_ONE_MINUTE = 60000000;
 	private final static long SAVE_OFFSET_TIME_MS = 300000;
 	private final static int SAVE_OFFSET_STEPS = 30;
 
@@ -282,7 +281,6 @@ public class SensorListener extends Service implements SensorEventListener {
 		}
 
 		// enable batching with delay of max 2 min
-		sm.registerListener(this, sm.getDefaultSensor(Sensor.TYPE_STEP_COUNTER), SensorManager.SENSOR_DELAY_GAME,
-				(int) (2 * MICROSECONDS_IN_ONE_MINUTE));
+		sm.registerListener(this, sm.getDefaultSensor(Sensor.TYPE_STEP_COUNTER), SensorManager.SENSOR_DELAY_GAME);
 	}
 }
