@@ -46,7 +46,7 @@
     NSDictionary *options = [command.arguments objectAtIndex:0];
     NSString *timeZone = [options objectForKey:@"timeZone"];
     NSCalendar *calendar = [NSCalendar currentCalendar];
-    if (timeZone) {
+    if (timeZone && [NSTimeZone timeZoneWithName:timeZone]) {
         calendar.timeZone = [NSTimeZone timeZoneWithName:timeZone];
     }
     NSDateComponents *dateComponents = [calendar components:NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay fromDate:[NSDate date]];
