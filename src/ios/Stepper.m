@@ -118,47 +118,77 @@
 }
 
 - (void)getLastEntries:(CDVInvokedUrlCommand*)command {
-    NSNumber *numberOfEntries = [command.arguments objectAtIndex:0];
-
-    if (![numberOfEntries isKindOfClass:[NSNumber class]]) {
-       CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid argument. Please provide a valid number of entries."];
-       [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-       return;
+    NSNumber *numberOfEntries = nil;
+    NSDate *startDate = nil;
+    NSDate *endDate = nil;
+  
+  
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    NSInteger x;
+  
+    // Check if arguments for startDate and endDate are provided
+    if ([command.arguments count] > 1 && [command.arguments objectAtIndex:1] != [NSNull null]) {
+        NSString *startDateString = [command.arguments objectAtIndex:1];
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"];
+        [dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
+        startDate = [dateFormatter dateFromString:startDateString];
+    }
+    
+    if ([command.arguments count] > 2 && [command.arguments objectAtIndex:2] != [NSNull null]) {
+        NSString *endDateString = [command.arguments objectAtIndex:2];
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"];
+        [dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
+        endDate = [dateFormatter dateFromString:endDateString];
+    }
+    
+    // Check if numberOfEntries is provided
+    if ([command.arguments count] > 0 && [command.arguments objectAtIndex:0] != [NSNull null]) {
+        numberOfEntries = [command.arguments objectAtIndex:0];
     }
 
-    NSInteger x = [numberOfEntries integerValue];
+    // If startDate and endDate are not provided, calculate them based on numberOfEntries
+    if (!startDate || !endDate) {
+        if (![numberOfEntries isKindOfClass:[NSNumber class]]) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid argument. Please provide a valid number of entries."];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            return;
+        }
 
-    // Use NSCalendar to get the start of the day
-    NSCalendar *calendar = [NSCalendar currentCalendar];
+        x = [numberOfEntries integerValue];
 
-    // Get the current date and time
-    NSDate *endDate = [NSDate date];
-    endDate = [endDate dateByAddingTimeInterval:48 * 60 * 60];
+        // Get the current date and time as the default endDate
+        if (!endDate) {
+            endDate = [NSDate date];
+        }
 
-    // Create a date components instance with the specified number of days
-    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
-    dateComponents.day = -x;  // Subtract 'x' days directly
+        // Create a date components instance with the specified number of days
+        NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+        dateComponents.day = -x;  // Subtract 'x' days directly
 
-    NSDate *originalStartDate = [calendar dateByAddingComponents:dateComponents toDate:endDate options:0];
+        NSDate *calculatedStartDate = [calendar dateByAddingComponents:dateComponents toDate:endDate options:0];
 
-    // Extract year, month, and day components
-    NSDateComponents *originalStartDateComponents = [calendar components:(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay) fromDate:originalStartDate];
+        // Extract year, month, and day components to reset time to start of day
+        NSDateComponents *calculatedStartDateComponents = [calendar components:(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay) fromDate:calculatedStartDate];
+        calculatedStartDateComponents.hour = 0;
+        calculatedStartDateComponents.minute = 0;
+        calculatedStartDateComponents.second = 0;
 
-    // Set time components to zero
-    originalStartDateComponents.hour = 0;
-    originalStartDateComponents.minute = 0;
-    originalStartDateComponents.second = 0;
-
-    // Create the start of day date
-    NSDate *startDate = [calendar dateFromComponents:originalStartDateComponents];
+        // Set startDate to the calculated start of day
+        startDate = [calendar dateFromComponents:calculatedStartDateComponents];
+    } else {
+      // Calculate the number of days between startDate and endDate
+      NSDateComponents *components = [calendar components:NSCalendarUnitDay fromDate:startDate toDate:endDate options:0];
+      x = components.day + 1;  // +1 to include both startDate and endDate
+    }
 
     __block CDVPluginResult* pluginResult = nil;
-
     NSMutableArray *entriesArray = [NSMutableArray array];
 
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-
+    
     // Fetch pedometer data for each day starting from startDate until endDate
     for (NSInteger i = 0; i < x; i++) {
         [self.pedometer queryPedometerDataFromDate:startDate toDate:[startDate dateByAddingTimeInterval:24 * 60 * 60] withHandler:^(CMPedometerData *pedometerData, NSError *error) {
