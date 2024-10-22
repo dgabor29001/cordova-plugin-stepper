@@ -104,9 +104,9 @@ Stepper.prototype.getStepsByPeriod = function (start, end, onSuccess, onError) {
 };
 
 // Android - Behave wierd - Documented
-Stepper.prototype.getLastEntries = function (num, onSuccess, onError) {
+Stepper.prototype.getLastEntries = function (num, startDate, endDate, onSuccess, onError) {
     let promise = new Promise(function(resolve, reject) {
-        exec(resolve, reject, "Stepper", "getLastEntries", [num]);
+        exec(resolve, reject, "Stepper", "getLastEntries", [num, startDate, endDate]);
     });
     if (onSuccess) promise = promise.then(onSuccess);
     if (onError) promise = promise.catch(onError);
