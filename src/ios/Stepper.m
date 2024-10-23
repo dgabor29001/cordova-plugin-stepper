@@ -122,6 +122,9 @@
     NSDate *startDate = nil;
     NSDate *endDate = nil;
   
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"];
+    [dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
   
     NSCalendar *calendar = [NSCalendar currentCalendar];
     NSInteger x;
@@ -129,17 +132,11 @@
     // Check if arguments for startDate and endDate are provided
     if ([command.arguments count] > 1 && [command.arguments objectAtIndex:1] != [NSNull null]) {
         NSString *startDateString = [command.arguments objectAtIndex:1];
-        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-        [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"];
-        [dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
         startDate = [dateFormatter dateFromString:startDateString];
     }
     
     if ([command.arguments count] > 2 && [command.arguments objectAtIndex:2] != [NSNull null]) {
         NSString *endDateString = [command.arguments objectAtIndex:2];
-        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-        [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"];
-        [dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
         endDate = [dateFormatter dateFromString:endDateString];
     }
     
