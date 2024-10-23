@@ -182,9 +182,6 @@
 
     __block CDVPluginResult* pluginResult = nil;
     NSMutableArray *entriesArray = [NSMutableArray array];
-
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     
     // Fetch pedometer data for each day starting from startDate until endDate
     for (NSInteger i = 0; i < x; i++) {
