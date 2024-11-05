@@ -122,9 +122,6 @@
     NSDate *startDate = nil;
     NSDate *endDate = nil;
   
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"];
-    [dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
   
     NSCalendar *calendar = [NSCalendar currentCalendar];
     NSInteger x;
@@ -132,11 +129,17 @@
     // Check if arguments for startDate and endDate are provided
     if ([command.arguments count] > 1 && [command.arguments objectAtIndex:1] != [NSNull null]) {
         NSString *startDateString = [command.arguments objectAtIndex:1];
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"];
+        [dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
         startDate = [dateFormatter dateFromString:startDateString];
     }
     
     if ([command.arguments count] > 2 && [command.arguments objectAtIndex:2] != [NSNull null]) {
         NSString *endDateString = [command.arguments objectAtIndex:2];
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"];
+        [dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
         endDate = [dateFormatter dateFromString:endDateString];
     }
     
@@ -158,6 +161,7 @@
         // Get the current date and time as the default endDate
         if (!endDate) {
             endDate = [NSDate date];
+            endDate = [endDate dateByAddingTimeInterval:48 * 60 * 60];
         }
 
         // Create a date components instance with the specified number of days
@@ -182,6 +186,9 @@
 
     __block CDVPluginResult* pluginResult = nil;
     NSMutableArray *entriesArray = [NSMutableArray array];
+
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     
     // Fetch pedometer data for each day starting from startDate until endDate
     for (NSInteger i = 0; i < x; i++) {
