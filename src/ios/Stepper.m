@@ -165,10 +165,10 @@
         }
 
         // Create a date components instance with the specified number of days
-        NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
-        dateComponents.day = -x;  // Subtract 'x' days directly
-
-        NSDate *calculatedStartDate = [calendar dateByAddingComponents:dateComponents toDate:endDate options:0];
+        NSDate *calculatedStartDate = [[NSCalendar currentCalendar] dateByAddingUnit:NSCalendarUnitDay
+                                                                      value:-x
+                                                                     toDate:[NSDate date]
+                                                                    options:0];
 
         // Extract year, month, and day components to reset time to start of day
         NSDateComponents *calculatedStartDateComponents = [calendar components:(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay) fromDate:calculatedStartDate];
