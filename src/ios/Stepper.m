@@ -158,15 +158,15 @@
 
         x = [numberOfEntries integerValue];
 
-        // Get the current date and time as the default endDate
         if (!endDate) {
             endDate = [NSDate date];
-            endDate = [endDate dateByAddingTimeInterval:48 * 60 * 60];
+            // Add one day to endDate using NSCalendar
+            endDate = [[NSCalendar currentCalendar] dateByAddingUnit:NSCalendarUnitDay value:1 toDate:endDate options:0];
         }
 
         // Create a date components instance with the specified number of days
         NSDate *calculatedStartDate = [[NSCalendar currentCalendar] dateByAddingUnit:NSCalendarUnitDay
-                                                                      value:-x
+                                                                      value:- (x - 2)
                                                                      toDate:[NSDate date]
                                                                     options:0];
 
@@ -220,3 +220,4 @@
 }
 
 @end
+
